@@ -1,0 +1,1120 @@
+<!DOCTYPE html>
+<html lang="ja">
+<head>
+<meta charset="UTF-8">
+<title>北総校 2026年度 イベントカレンダー</title>
+<link href="https://fonts.googleapis.com/css2?family=Zen+Maru+Gothic:wght@400;500;700&family=Quicksand:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+@page { size: A4 portrait; margin: 6mm; }
+* { margin: 0; padding: 0; box-sizing: border-box; }
+body {
+    font-family: "Zen Maru Gothic", "Hiragino Maru Gothic ProN", sans-serif;
+    color: #444;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.page {
+    width: 198mm;
+    height: 285mm;
+    padding: 8mm 10mm;
+    page-break-after: always;
+    position: relative;
+    overflow: hidden;
+}
+.page:last-child { page-break-after: avoid; }
+
+/* ===== カレンダーページ ===== */
+.cal-page {
+    background: #fafafa;
+}
+
+.top-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: 12px;
+    margin-bottom: 5mm;
+    padding-bottom: 3mm;
+    border-bottom: 2px solid #e8c860;
+}
+.year-month {
+    display: flex;
+    flex-direction: column;
+    line-height: 1;
+}
+.ym-year {
+    font-family: "Quicksand", sans-serif;
+    font-size: 16px;
+    font-weight: 600;
+    color: #b0a090;
+    letter-spacing: 2px;
+}
+.ym-num {
+    font-family: "Quicksand", sans-serif;
+    font-size: 48px;
+    font-weight: 700;
+    color: #c8a840;
+    letter-spacing: 2px;
+    line-height: 1;
+}
+.brand {
+    flex: 1;
+}
+.brand-name {
+    font-size: 22px;
+    font-weight: 700;
+    color: #555;
+}
+.campus-legend {
+    display: flex;
+    gap: 10px;
+    font-size: 10px;
+    color: #888;
+}
+.campus { display: flex; align-items: center; gap: 3px; }
+.cdot { display: inline-block; width: 10px; height: 10px; border-radius: 50%; }
+
+/* カレンダーテーブル */
+.cal {
+    width: 100%;
+    border-collapse: separate;
+    border-spacing: 1px;
+    table-layout: fixed;
+}
+.dh {
+    background: #f0ebe0;
+    color: #8a7a60;
+    text-align: center;
+    padding: 6px 2px;
+    font-size: 12px;
+    font-weight: 700;
+    letter-spacing: 2px;
+}
+.dh.sat { color: #5a8ab0; }
+.dh.sun { color: #d07070; }
+
+.dc {
+    background: white;
+    vertical-align: top;
+    padding: 2px 3px;
+    height: 36mm;
+    border: 0.5px solid #eee;
+}
+.dc.empty { background: #f8f8f6; }
+.dc.sat-bg { background: #f8faff; }
+.dc.sun-bg { background: #fff8f8; }
+
+.dn {
+    font-family: "Quicksand", sans-serif;
+    font-size: 14px;
+    font-weight: 700;
+    color: #aaa;
+    text-align: right;
+    padding-right: 2px;
+    margin-bottom: 1px;
+}
+.dn.sat-n { color: #5a8ab0; }
+.dn.sun-n { color: #d07070; }
+
+.ev {
+    font-size: 7px;
+    line-height: 1.35;
+    margin-bottom: 1.5px;
+    padding: 1.5px 3px;
+    display: flex;
+    align-items: flex-start;
+    gap: 3px;
+    color: #555;
+}
+.dot {
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    border-radius: 50%;
+    flex-shrink: 0;
+    margin-top: 1.5px;
+}
+
+/* 下部バー */
+.bottom-bar {
+    display: flex;
+    gap: 10mm;
+    margin-top: 3mm;
+    font-size: 9px;
+}
+.notice { flex: 1; }
+.notice-label {
+    display: inline-block;
+    background: #e8c860;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.notice-text { color: #888; line-height: 1.5; }
+.contact { text-align: right; }
+.contact-label {
+    display: inline-block;
+    background: #e8c860;
+    color: white;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 9px;
+    font-weight: 700;
+    margin-bottom: 2px;
+}
+.contact-text { color: #888; line-height: 1.5; }
+
+/* ===== 詳細ページ ===== */
+.detail-page {
+    background: white;
+}
+.detail-header {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    margin-bottom: 4mm;
+    padding-bottom: 2mm;
+    border-bottom: 2px solid #e8c860;
+}
+.detail-ym {
+    font-size: 20px;
+    font-weight: 700;
+    color: #c8a840;
+}
+.detail-title {
+    font-size: 14px;
+    font-weight: 700;
+    color: #666;
+}
+.detail-count {
+    font-size: 11px;
+    color: #aaa;
+    margin-left: auto;
+}
+
+.detail-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 11px;
+}
+.dth {
+    background: #f0c830;
+    color: white;
+    padding: 7px 8px;
+    text-align: left;
+    font-weight: 700;
+    font-size: 11px;
+}
+.detail-table tbody tr {
+    border-bottom: 0.5px solid #eee;
+}
+.detail-table tbody tr:nth-child(even) {
+    background: #fafaf5;
+}
+.detail-table td {
+    padding: 5px 8px;
+    vertical-align: top;
+    line-height: 1.5;
+}
+.dt-date { font-weight: 600; color: #888; white-space: nowrap; }
+.dt-time { color: #999; white-space: nowrap; }
+.dt-venue { font-weight: 600; white-space: nowrap; }
+tr.v-tomisato .dt-venue { color: #c06080; }
+tr.v-narita .dt-venue { color: #4888b8; }
+tr.v-kamagaya .dt-venue { color: #408840; }
+.dt-title { color: #444; }
+.dt-circle { color: #999; font-size: 10px; }
+
+@media print {
+    body { background: none; }
+}
+</style>
+</head>
+<body>
+
+    <div class="page cal-page">
+        <div class="top-bar">
+            <div class="year-month">
+                <span class="ym-year">2026</span>
+                <span class="ym-num">04</span>
+            </div>
+            <div class="brand">
+                <span class="brand-name">北総校</span>
+            </div>
+            <div class="campus-legend">
+                <span class="campus"><span class="cdot" style="background:#e8889e;"></span>富里キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#7eb5e8;"></span>成田キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#a0cc80;"></span>鎌ヶ谷キャンパス</span>
+            </div>
+        </div>
+        <table class="cal">
+            <thead><tr><th class="dh ">月</th><th class="dh ">火</th><th class="dh ">水</th><th class="dh ">木</th><th class="dh ">金</th><th class="dh sat">土</th><th class="dh sun">日</th></tr></thead>
+            <tbody><tr><td class="dc empty"></td><td class="dc empty"></td><td class="dc "><div class="dn ">1</div></td><td class="dc "><div class="dn ">2</div></td><td class="dc "><div class="dn ">3</div></td><td class="dc sat-bg"><div class="dn sat-n">4</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>理想のまちをつくろう！楽しみながら学...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>予約・お問い合わせを、かんたんに受け...</div></td><td class="dc sun-bg"><div class="dn sun-n">5</div></td></tr><tr><td class="dc "><div class="dn ">6</div></td><td class="dc "><div class="dn ">7</div></td><td class="dc "><div class="dn ">8</div></td><td class="dc "><div class="dn ">9</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>SNSの落とし穴から身を守る！今日か...</div></td><td class="dc "><div class="dn ">10</div></td><td class="dc sat-bg"><div class="dn sat-n">11</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>犯人はAI？守るのもAI！最新詐欺か...</div></td><td class="dc sun-bg"><div class="dn sun-n">12</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>明日から使える！AIプレゼン資料作成...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>「映える写真」をAIで！スマホで魅せ...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>使うだけから一歩先へ。生成AIで暮ら...</div></td></tr><tr><td class="dc "><div class="dn ">13</div></td><td class="dc "><div class="dn ">14</div></td><td class="dc "><div class="dn ">15</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AI活用 超入門編　ChatGPT/...</div></td><td class="dc "><div class="dn ">16</div></td><td class="dc "><div class="dn ">17</div></td><td class="dc sat-bg"><div class="dn sat-n">18</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>思い出写真をもっと素敵に！AIでかん...</div></td><td class="dc sun-bg"><div class="dn sun-n">19</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>SNS時代の新常識！ネットで自分を守...</div></td></tr><tr><td class="dc "><div class="dn ">20</div></td><td class="dc "><div class="dn ">21</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>知っておきたい！今の時代のためのデジ...</div></td><td class="dc "><div class="dn ">22</div></td><td class="dc "><div class="dn ">23</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>スタッフのSNS運用どうしてる？お店...</div></td><td class="dc "><div class="dn ">24</div></td><td class="dc sat-bg"><div class="dn sat-n">25</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>スマホでプロ並み！AIアプリで実現す...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>AIでお絵かき！世界にひとつだけの魔...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>AIで写真を面白く変身させてみよう</div></td><td class="dc sun-bg"><div class="dn sun-n">26</div></td></tr><tr><td class="dc "><div class="dn ">27</div></td><td class="dc "><div class="dn ">28</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>原神で学ぶ創造力！日常を冒険に変える...</div></td><td class="dc "><div class="dn ">29</div></td><td class="dc "><div class="dn ">30</div></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td></tr></tbody>
+        </table>
+        <div class="bottom-bar">
+            <div class="notice">
+                <div class="notice-label">注意事項</div>
+                <div class="notice-text">天候等により、開催内容やスケジュールが変更になる可能性がございます。最新情報は随時ご確認ください。</div>
+            </div>
+            <div class="contact">
+                <div class="contact-label">お申込み</div>
+                <div class="contact-text">北総校 富里キャンパス</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page detail-page">
+        <div class="detail-header">
+            <span class="detail-ym">2026年4月</span>
+            <span class="detail-title">イベント詳細スケジュール</span>
+            <span class="detail-count">全16件</span>
+        </div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th class="dth" style="width:10%;">日付</th>
+                    <th class="dth" style="width:8%;">開始時間</th>
+                    <th class="dth" style="width:8%;">会場</th>
+                    <th class="dth" style="width:48%;">講座名</th>
+                    <th class="dth" style="width:26%;">サークル名</th>
+                </tr>
+            </thead>
+            <tbody><tr class="v-tomisato">
+            <td class="dt-date">4/4(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">理想のまちをつくろう！楽しみながら学ぶプログラミング的思考　マインクラフト</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">4/4(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">予約・お問い合わせを、かんたんに受け取る仕組みづくり（googleフォーム）</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/9(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">SNSの落とし穴から身を守る！今日からできる情報セキュリティ</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/11(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">犯人はAI？守るのもAI！最新詐欺から自分と家族を守る「設定」の基本</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/12(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">明日から使える！AIプレゼン資料作成～アイデア出しからデザインまでをAIに任せる新常識 with Gemini</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">4/12(日)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">「映える写真」をAIで！スマホで魅せる撮影＆編集テク　with Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">4/12(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">使うだけから一歩先へ。生成AIで暮らしの質向上 〜片付け編〜</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/15(水)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AI活用 超入門編　ChatGPT/Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/18(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">思い出写真をもっと素敵に！AIでかんたん整理＆編集術 Apple Intelligence</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">4/19(日)</td>
+            <td class="dt-time">16:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">SNS時代の新常識！ネットで自分を守る方法</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">4/21(火)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">知っておきたい！今の時代のためのデジタル安全</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/23(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">スタッフのSNS運用どうしてる？お店を守る『デジタルルールづくり』相談会</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">4/25(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">スマホでプロ並み！AIアプリで実現する写真撮影＆加工講座　with Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">4/25(土)</td>
+            <td class="dt-time">16:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">AIでお絵かき！世界にひとつだけの魔法の図鑑をつくろう</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">4/25(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">AIで写真を面白く変身させてみよう</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">4/28(火)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">原神で学ぶ創造力！日常を冒険に変えるワークショップ</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr></tbody>
+        </table>
+    </div>
+    
+    <div class="page cal-page">
+        <div class="top-bar">
+            <div class="year-month">
+                <span class="ym-year">2026</span>
+                <span class="ym-num">05</span>
+            </div>
+            <div class="brand">
+                <span class="brand-name">北総校</span>
+            </div>
+            <div class="campus-legend">
+                <span class="campus"><span class="cdot" style="background:#e8889e;"></span>富里キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#7eb5e8;"></span>成田キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#a0cc80;"></span>鎌ヶ谷キャンパス</span>
+            </div>
+        </div>
+        <table class="cal">
+            <thead><tr><th class="dh ">月</th><th class="dh ">火</th><th class="dh ">水</th><th class="dh ">木</th><th class="dh ">金</th><th class="dh sat">土</th><th class="dh sun">日</th></tr></thead>
+            <tbody><tr><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc "><div class="dn ">1</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>AIを「最高の先生に」Geminiで...</div></td><td class="dc sat-bg"><div class="dn sat-n">2</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>みんなで協力！マイクラ宝探し大冒険</div></td><td class="dc sun-bg"><div class="dn sun-n">3</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AI勉強術！ChatGPTで要約・整...</div></td></tr><tr><td class="dc "><div class="dn ">4</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>知っておきたい！今の時代のためのデジ...</div></td><td class="dc "><div class="dn ">5</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>撮って・試して・比べよう！スマホ＆G...</div></td><td class="dc "><div class="dn ">6</div></td><td class="dc "><div class="dn ">7</div></td><td class="dc "><div class="dn ">8</div></td><td class="dc sat-bg"><div class="dn sat-n">9</div></td><td class="dc sun-bg"><div class="dn sun-n">10</div></td></tr><tr><td class="dc "><div class="dn ">11</div></td><td class="dc "><div class="dn ">12</div></td><td class="dc "><div class="dn ">13</div></td><td class="dc "><div class="dn ">14</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>初心者でも安心！AIと学ぶGoogl...</div></td><td class="dc "><div class="dn ">15</div></td><td class="dc sat-bg"><div class="dn sat-n">16</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>Canvaでつくる！魅せるチラシ＆P...</div></td><td class="dc sun-bg"><div class="dn sun-n">17</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>親子で楽しむ！iPadではじめてのA...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>ゲームで育む！フォートナイトで楽しむ...</div></td></tr><tr><td class="dc "><div class="dn ">18</div></td><td class="dc "><div class="dn ">19</div></td><td class="dc "><div class="dn ">20</div></td><td class="dc "><div class="dn ">21</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>「AI詐欺」に騙されないための防衛術...</div></td><td class="dc "><div class="dn ">22</div></td><td class="dc sat-bg"><div class="dn sat-n">23</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>離れて暮らす家族を見守る。デジタルで...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>その情報、本当に信じて大丈夫？フェイ...</div></td><td class="dc sun-bg"><div class="dn sun-n">24</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>仕事でAI活用！これからはじめる超入...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>〈AI中級〉使うだけから一歩先へ。生...</div></td></tr><tr><td class="dc "><div class="dn ">25</div></td><td class="dc "><div class="dn ">26</div></td><td class="dc "><div class="dn ">27</div></td><td class="dc "><div class="dn ">28</div></td><td class="dc "><div class="dn ">29</div></td><td class="dc sat-bg"><div class="dn sat-n">30</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>「おもいで箱」でかんたん写真整理術</div></td><td class="dc sun-bg"><div class="dn sun-n">31</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>Geminiでつくる！AIが叶える魅...</div></td></tr></tbody>
+        </table>
+        <div class="bottom-bar">
+            <div class="notice">
+                <div class="notice-label">注意事項</div>
+                <div class="notice-text">天候等により、開催内容やスケジュールが変更になる可能性がございます。最新情報は随時ご確認ください。</div>
+            </div>
+            <div class="contact">
+                <div class="contact-label">お申込み</div>
+                <div class="contact-text">北総校 富里キャンパス</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page detail-page">
+        <div class="detail-header">
+            <span class="detail-ym">2026年5月</span>
+            <span class="detail-title">イベント詳細スケジュール</span>
+            <span class="detail-count">全16件</span>
+        </div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th class="dth" style="width:10%;">日付</th>
+                    <th class="dth" style="width:8%;">開始時間</th>
+                    <th class="dth" style="width:8%;">会場</th>
+                    <th class="dth" style="width:48%;">講座名</th>
+                    <th class="dth" style="width:26%;">サークル名</th>
+                </tr>
+            </thead>
+            <tbody><tr class="v-narita">
+            <td class="dt-date">5/1(金)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">AIを「最高の先生に」Geminiではじめる質問力アップ講座</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/2(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">みんなで協力！マイクラ宝探し大冒険</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/3(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AI勉強術！ChatGPTで要約・整理・暗記効率をぐっとUP！</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">5/4(月)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">知っておきたい！今の時代のためのデジタル安全</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">5/5(火)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">撮って・試して・比べよう！スマホ＆GoPro＆デジカメ撮影体験会</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/14(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">初心者でも安心！AIと学ぶGoogleマップ集客・MEO対策講座</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">5/16(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">Canvaでつくる！魅せるチラシ＆POPデザイン講座</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">5/17(日)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">親子で楽しむ！iPadではじめてのAI×プログラミング体験（スクラッチJr）</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">5/17(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">ゲームで育む！フォートナイトで楽しむ思考力とチームワーク</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/21(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">「AI詐欺」に騙されないための防衛術 〜最新の手口を学ぶ〜</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/23(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">離れて暮らす家族を見守る。デジタルでつなぐ“安心の絆”講座</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">5/23(土)</td>
+            <td class="dt-time">16:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">その情報、本当に信じて大丈夫？フェイク動画・フェイク画像</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/24(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">仕事でAI活用！これからはじめる超入門編 Gemini/notebookLM</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">5/24(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">〈AI中級〉使うだけから一歩先へ。生成AIで暮らしの質向上</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/30(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">「おもいで箱」でかんたん写真整理術</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">5/31(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">Geminiでつくる！AIが叶える魅力的な写真加工</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr></tbody>
+        </table>
+    </div>
+    
+    <div class="page cal-page">
+        <div class="top-bar">
+            <div class="year-month">
+                <span class="ym-year">2026</span>
+                <span class="ym-num">06</span>
+            </div>
+            <div class="brand">
+                <span class="brand-name">北総校</span>
+            </div>
+            <div class="campus-legend">
+                <span class="campus"><span class="cdot" style="background:#e8889e;"></span>富里キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#7eb5e8;"></span>成田キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#a0cc80;"></span>鎌ヶ谷キャンパス</span>
+            </div>
+        </div>
+        <table class="cal">
+            <thead><tr><th class="dh ">月</th><th class="dh ">火</th><th class="dh ">水</th><th class="dh ">木</th><th class="dh ">金</th><th class="dh sat">土</th><th class="dh sun">日</th></tr></thead>
+            <tbody><tr><td class="dc "><div class="dn ">1</div></td><td class="dc "><div class="dn ">2</div></td><td class="dc "><div class="dn ">3</div></td><td class="dc "><div class="dn ">4</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>予約電話から解放！AIを使って予約を...</div></td><td class="dc "><div class="dn ">5</div></td><td class="dc sat-bg"><div class="dn sat-n">6</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>成田から世界一周！Google Ea...</div></td><td class="dc sun-bg"><div class="dn sun-n">7</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>家族で楽しむ！AIでスマホ写真をかわ...</div></td></tr><tr><td class="dc "><div class="dn ">8</div></td><td class="dc "><div class="dn ">9</div></td><td class="dc "><div class="dn ">10</div></td><td class="dc "><div class="dn ">11</div></td><td class="dc "><div class="dn ">12</div></td><td class="dc sat-bg"><div class="dn sat-n">13</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>Robloxでロジカルシンキングゲー...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>親子で楽しむ！家庭の分担リスト</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>プログラミング学習〜スクラッチで自分...</div></td><td class="dc sun-bg"><div class="dn sun-n">14</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AI動画生成ツールで魅力アップ！簡単...</div></td></tr><tr><td class="dc "><div class="dn ">15</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>AIに聞いてみよう！我が家の献立アイ...</div></td><td class="dc "><div class="dn ">16</div></td><td class="dc "><div class="dn ">17</div></td><td class="dc "><div class="dn ">18</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>そのメッセージ、本当に大丈夫？「なり...</div></td><td class="dc "><div class="dn ">19</div></td><td class="dc sat-bg"><div class="dn sat-n">20</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>旅先でも安心！公共Wi-Fiの落とし...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>子供のデジタル教育と家族のルール作り</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>デザインが苦手でも、選んで変えるだけ...</div></td><td class="dc sun-bg"><div class="dn sun-n">21</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>まるで魔法！描いた絵を動かしてみよう...</div></td></tr><tr><td class="dc "><div class="dn ">22</div></td><td class="dc "><div class="dn ">23</div></td><td class="dc "><div class="dn ">24</div></td><td class="dc "><div class="dn ">25</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>影と光を使っていつもとは違う写真表現...</div></td><td class="dc "><div class="dn ">26</div></td><td class="dc sat-bg"><div class="dn sat-n">27</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>写真と短い動画で、日常を楽しく残そう...</div></td><td class="dc sun-bg"><div class="dn sun-n">28</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>商店主・個人事業主交流会</div></td></tr><tr><td class="dc "><div class="dn ">29</div></td><td class="dc "><div class="dn ">30</div></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td></tr></tbody>
+        </table>
+        <div class="bottom-bar">
+            <div class="notice">
+                <div class="notice-label">注意事項</div>
+                <div class="notice-text">天候等により、開催内容やスケジュールが変更になる可能性がございます。最新情報は随時ご確認ください。</div>
+            </div>
+            <div class="contact">
+                <div class="contact-label">お申込み</div>
+                <div class="contact-text">北総校 富里キャンパス</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page detail-page">
+        <div class="detail-header">
+            <span class="detail-ym">2026年6月</span>
+            <span class="detail-title">イベント詳細スケジュール</span>
+            <span class="detail-count">全16件</span>
+        </div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th class="dth" style="width:10%;">日付</th>
+                    <th class="dth" style="width:8%;">開始時間</th>
+                    <th class="dth" style="width:8%;">会場</th>
+                    <th class="dth" style="width:48%;">講座名</th>
+                    <th class="dth" style="width:26%;">サークル名</th>
+                </tr>
+            </thead>
+            <tbody><tr class="v-tomisato">
+            <td class="dt-date">6/4(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">予約電話から解放！AIを使って予約をできるようにしてみよう</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">6/6(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">成田から世界一周！Google Earthでプチ冒険の旅へ出かけよう</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">6/7(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">家族で楽しむ！AIでスマホ写真をかわいくアレンジしよう  ChatGPT</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/13(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">Robloxでロジカルシンキングゲーム体験</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">6/13(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">親子で楽しむ！家庭の分担リスト</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">6/13(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">プログラミング学習〜スクラッチで自分だけのゲームを作ってみよう〜</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/14(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AI動画生成ツールで魅力アップ！簡単PR動画制作 with NotebookLM</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">6/15(月)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">AIに聞いてみよう！我が家の献立アイデア with Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/18(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">そのメッセージ、本当に大丈夫？「なりすまし・詐欺」を未然に防ぐ見分け方講座</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/20(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">旅先でも安心！公共Wi-Fiの落とし穴と、安全な「Car Play・旅行デバイス」活用法</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">6/20(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">子供のデジタル教育と家族のルール作り</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">6/20(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">デザインが苦手でも、選んで変えるだけ！伝わるチラシを作ろう（canva）</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/21(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">まるで魔法！描いた絵を動かしてみよう　with Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/25(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">影と光を使っていつもとは違う写真表現を学んでみよう</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">6/27(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">写真と短い動画で、日常を楽しく残そう（Instagram体験）</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">6/28(日)</td>
+            <td class="dt-time">17:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">商店主・個人事業主交流会</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr></tbody>
+        </table>
+    </div>
+    
+    <div class="page cal-page">
+        <div class="top-bar">
+            <div class="year-month">
+                <span class="ym-year">2026</span>
+                <span class="ym-num">07</span>
+            </div>
+            <div class="brand">
+                <span class="brand-name">北総校</span>
+            </div>
+            <div class="campus-legend">
+                <span class="campus"><span class="cdot" style="background:#e8889e;"></span>富里キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#7eb5e8;"></span>成田キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#a0cc80;"></span>鎌ヶ谷キャンパス</span>
+            </div>
+        </div>
+        <table class="cal">
+            <thead><tr><th class="dh ">月</th><th class="dh ">火</th><th class="dh ">水</th><th class="dh ">木</th><th class="dh ">金</th><th class="dh sat">土</th><th class="dh sun">日</th></tr></thead>
+            <tbody><tr><td class="dc empty"></td><td class="dc empty"></td><td class="dc "><div class="dn ">1</div></td><td class="dc "><div class="dn ">2</div></td><td class="dc "><div class="dn ">3</div></td><td class="dc sat-bg"><div class="dn sat-n">4</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>AIで旅行やお出かけ先の計画を立てて...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>親子で楽しめるAIクイズ作成体験　G...</div></td><td class="dc sun-bg"><div class="dn sun-n">5</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>暮らしの「うっかり」をAIが解決。A...</div></td></tr><tr><td class="dc "><div class="dn ">6</div></td><td class="dc "><div class="dn ">7</div></td><td class="dc "><div class="dn ">8</div></td><td class="dc "><div class="dn ">9</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>3ステップで完成！Googleフォー...</div></td><td class="dc "><div class="dn ">10</div></td><td class="dc sat-bg"><div class="dn sat-n">11</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>世界発見ラボ：GeoGusessrで...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>AI導入の基礎知識：安全な活用のため...</div></td><td class="dc sun-bg"><div class="dn sun-n">12</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>〈AI中級〉AIを使えば時間大幅短縮...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>GoogleLensを活用！親子で不...</div></td></tr><tr><td class="dc "><div class="dn ">13</div></td><td class="dc "><div class="dn ">14</div></td><td class="dc "><div class="dn ">15</div></td><td class="dc "><div class="dn ">16</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AIを最高のパートナーにするために。...</div></td><td class="dc "><div class="dn ">17</div></td><td class="dc sat-bg"><div class="dn sat-n">18</div></td><td class="dc sun-bg"><div class="dn sun-n">19</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>Googleフォームでアンケートを作...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>みんなで協力！マイクラ宝探し大冒険</div></td></tr><tr><td class="dc "><div class="dn ">20</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>〈AI中級〉使うだけから一歩先へ。生...</div></td><td class="dc "><div class="dn ">21</div></td><td class="dc "><div class="dn ">22</div></td><td class="dc "><div class="dn ">23</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>写真整理を学ぼう</div></td><td class="dc "><div class="dn ">24</div></td><td class="dc sat-bg"><div class="dn sat-n">25</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>「AIを使った制作物」の注意点</div></td><td class="dc sun-bg"><div class="dn sun-n">26</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>タブレット1台でOJTが変わる！『デ...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>この写真どこだっけ？はもう卒業。アル...</div></td></tr><tr><td class="dc "><div class="dn ">27</div></td><td class="dc "><div class="dn ">28</div></td><td class="dc "><div class="dn ">29</div></td><td class="dc "><div class="dn ">30</div></td><td class="dc "><div class="dn ">31</div></td><td class="dc empty"></td><td class="dc empty"></td></tr></tbody>
+        </table>
+        <div class="bottom-bar">
+            <div class="notice">
+                <div class="notice-label">注意事項</div>
+                <div class="notice-text">天候等により、開催内容やスケジュールが変更になる可能性がございます。最新情報は随時ご確認ください。</div>
+            </div>
+            <div class="contact">
+                <div class="contact-label">お申込み</div>
+                <div class="contact-text">北総校 富里キャンパス</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page detail-page">
+        <div class="detail-header">
+            <span class="detail-ym">2026年7月</span>
+            <span class="detail-title">イベント詳細スケジュール</span>
+            <span class="detail-count">全16件</span>
+        </div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th class="dth" style="width:10%;">日付</th>
+                    <th class="dth" style="width:8%;">開始時間</th>
+                    <th class="dth" style="width:8%;">会場</th>
+                    <th class="dth" style="width:48%;">講座名</th>
+                    <th class="dth" style="width:26%;">サークル名</th>
+                </tr>
+            </thead>
+            <tbody><tr class="v-kamagaya">
+            <td class="dt-date">7/4(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">AIで旅行やお出かけ先の計画を立ててみよう</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">7/4(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">親子で楽しめるAIクイズ作成体験　Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/5(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">暮らしの「うっかり」をAIが解決。Apple WatchとAIで整える健康習慣サークル</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/9(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">3ステップで完成！Googleフォームで始める“売れるアンケート”講座</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/11(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">世界発見ラボ：GeoGusessrで学ぶ地理と文化</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">7/11(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">AI導入の基礎知識：安全な活用のためのルールとマナー</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">7/12(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">〈AI中級〉AIを使えば時間大幅短縮！考えをまとめる→プレゼン作成</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">7/12(日)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">GoogleLensを活用！親子で不思議な生き物調査隊</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/16(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AIを最高のパートナーにするために。今日から始める安全な活用方法</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/19(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">Googleフォームでアンケートを作ろう</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">7/19(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">みんなで協力！マイクラ宝探し大冒険</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">7/20(月)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">〈AI中級〉使うだけから一歩先へ。生成AIで暮らしの質向上</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/23(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">写真整理を学ぼう</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/25(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">「AIを使った制作物」の注意点</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">7/26(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">タブレット1台でOJTが変わる！『デジタルチェックリスト』で教え漏れを防ぐ実践会</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">7/26(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">この写真どこだっけ？はもう卒業。アルバム整理術（iPhone向け）</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr></tbody>
+        </table>
+    </div>
+    
+    <div class="page cal-page">
+        <div class="top-bar">
+            <div class="year-month">
+                <span class="ym-year">2026</span>
+                <span class="ym-num">08</span>
+            </div>
+            <div class="brand">
+                <span class="brand-name">北総校</span>
+            </div>
+            <div class="campus-legend">
+                <span class="campus"><span class="cdot" style="background:#e8889e;"></span>富里キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#7eb5e8;"></span>成田キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#a0cc80;"></span>鎌ヶ谷キャンパス</span>
+            </div>
+        </div>
+        <table class="cal">
+            <thead><tr><th class="dh ">月</th><th class="dh ">火</th><th class="dh ">水</th><th class="dh ">木</th><th class="dh ">金</th><th class="dh sat">土</th><th class="dh sun">日</th></tr></thead>
+            <tbody><tr><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc sat-bg"><div class="dn sat-n">1</div></td><td class="dc sun-bg"><div class="dn sun-n">2</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AI活用で日常の悩みを解決〜旅行編〜</div></td></tr><tr><td class="dc "><div class="dn ">3</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>これを知ればもっと撮りたくなる！iP...</div></td><td class="dc "><div class="dn ">4</div></td><td class="dc "><div class="dn ">5</div></td><td class="dc "><div class="dn ">6</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>「AI検索」を安全に使おう：その回答...</div></td><td class="dc "><div class="dn ">7</div></td><td class="dc sat-bg"><div class="dn sat-n">8</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>知っておきたい！今の時代のためのデジ...</div></td><td class="dc sun-bg"><div class="dn sun-n">9</div></td></tr><tr><td class="dc "><div class="dn ">10</div></td><td class="dc "><div class="dn ">11</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>親子でチャレンジ！AIでお絵描き＆わ...</div></td><td class="dc "><div class="dn ">12</div></td><td class="dc "><div class="dn ">13</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AI分析 × Googleフォームで...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>家族で楽しむ！AIでスマホの写真アレ...</div></td><td class="dc "><div class="dn ">14</div></td><td class="dc sat-bg"><div class="dn sat-n">15</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>「子供とAI」を安全に使おう：正しく...</div></td><td class="dc sun-bg"><div class="dn sun-n">16</div></td></tr><tr><td class="dc "><div class="dn ">17</div></td><td class="dc "><div class="dn ">18</div></td><td class="dc "><div class="dn ">19</div></td><td class="dc "><div class="dn ">20</div></td><td class="dc "><div class="dn ">21</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>ショートフォトムービー制作</div></td><td class="dc sat-bg"><div class="dn sat-n">22</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>誰でも簡単！はじめてのWebサイト作...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>〈canva中級〉エフェクトや素材を...</div></td><td class="dc sun-bg"><div class="dn sun-n">23</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>プログラミング学習〜スクラッチで自分...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>写真が動き出す？おうちの魔法使いにな...</div></td></tr><tr><td class="dc "><div class="dn ">24</div></td><td class="dc "><div class="dn ">25</div></td><td class="dc "><div class="dn ">26</div></td><td class="dc "><div class="dn ">27</div></td><td class="dc "><div class="dn ">28</div></td><td class="dc sat-bg"><div class="dn sat-n">29</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>「おうちのAI」を安全に使おう：写真...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>ゲームを通して、考える力・チームワー...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>AIで「なつやすみお便りフォト」作成</div></td><td class="dc sun-bg"><div class="dn sun-n">30</div></td></tr><tr><td class="dc "><div class="dn ">31</div></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td></tr></tbody>
+        </table>
+        <div class="bottom-bar">
+            <div class="notice">
+                <div class="notice-label">注意事項</div>
+                <div class="notice-text">天候等により、開催内容やスケジュールが変更になる可能性がございます。最新情報は随時ご確認ください。</div>
+            </div>
+            <div class="contact">
+                <div class="contact-label">お申込み</div>
+                <div class="contact-text">北総校 富里キャンパス</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page detail-page">
+        <div class="detail-header">
+            <span class="detail-ym">2026年8月</span>
+            <span class="detail-title">イベント詳細スケジュール</span>
+            <span class="detail-count">全16件</span>
+        </div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th class="dth" style="width:10%;">日付</th>
+                    <th class="dth" style="width:8%;">開始時間</th>
+                    <th class="dth" style="width:8%;">会場</th>
+                    <th class="dth" style="width:48%;">講座名</th>
+                    <th class="dth" style="width:26%;">サークル名</th>
+                </tr>
+            </thead>
+            <tbody><tr class="v-tomisato">
+            <td class="dt-date">8/2(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AI活用で日常の悩みを解決〜旅行編〜</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">8/3(月)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">これを知ればもっと撮りたくなる！iPhoneカメラ活用術</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/6(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">「AI検索」を安全に使おう：その回答、信じて大丈夫？根拠の確認法</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">8/8(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">知っておきたい！今の時代のためのデジタル安全</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/11(火)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">親子でチャレンジ！AIでお絵描き＆わくわく旅作りワークショップ　Gemini・ChatGPT</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/13(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AI分析 × Googleフォームで次の一手を発見するアンケート活用講座　GoogleWorkSpace</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">8/13(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">家族で楽しむ！AIでスマホの写真アレンジ</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">8/15(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">「子供とAI」を安全に使おう：正しく怖がり、賢く伸ばす。親子で学ぶリテラシー</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/21(金)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">ショートフォトムービー制作</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/22(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">誰でも簡単！はじめてのWebサイト作成入門！　Google　Workspace</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">8/22(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">〈canva中級〉エフェクトや素材を駆使！さらに伝わるチラシ作り</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/23(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">プログラミング学習〜スクラッチで自分だけのゲームを作ってみよう〜</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">8/23(日)</td>
+            <td class="dt-time">16:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">写真が動き出す？おうちの魔法使いになろう！</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">8/29(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">「おうちのAI」を安全に使おう：写真や名前、入力して大丈夫？家族を守る3つの約束</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">8/29(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">ゲームを通して、考える力・チームワークを楽しもう「フォートナイト」</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">8/29(土)</td>
+            <td class="dt-time">16:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">AIで「なつやすみお便りフォト」作成</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr></tbody>
+        </table>
+    </div>
+    
+    <div class="page cal-page">
+        <div class="top-bar">
+            <div class="year-month">
+                <span class="ym-year">2026</span>
+                <span class="ym-num">09</span>
+            </div>
+            <div class="brand">
+                <span class="brand-name">北総校</span>
+            </div>
+            <div class="campus-legend">
+                <span class="campus"><span class="cdot" style="background:#e8889e;"></span>富里キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#7eb5e8;"></span>成田キャンパス</span>
+                <span class="campus"><span class="cdot" style="background:#a0cc80;"></span>鎌ヶ谷キャンパス</span>
+            </div>
+        </div>
+        <table class="cal">
+            <thead><tr><th class="dh ">月</th><th class="dh ">火</th><th class="dh ">水</th><th class="dh ">木</th><th class="dh ">金</th><th class="dh sat">土</th><th class="dh sun">日</th></tr></thead>
+            <tbody><tr><td class="dc empty"></td><td class="dc "><div class="dn ">1</div></td><td class="dc "><div class="dn ">2</div></td><td class="dc "><div class="dn ">3</div></td><td class="dc "><div class="dn ">4</div></td><td class="dc sat-bg"><div class="dn sat-n">5</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>写真と短い動画で、日常を楽しく残そう...</div></td><td class="dc sun-bg"><div class="dn sun-n">6</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>リズム×論理思考〜太鼓で学ぶ集中と運...</div></td></tr><tr><td class="dc "><div class="dn ">7</div></td><td class="dc "><div class="dn ">8</div></td><td class="dc "><div class="dn ">9</div></td><td class="dc "><div class="dn ">10</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>明日から使える！AIプレゼン資料作成...</div></td><td class="dc "><div class="dn ">11</div></td><td class="dc sat-bg"><div class="dn sat-n">12</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>「2030年、あなたのお宅のデジタル...</div></td><td class="dc sun-bg"><div class="dn sun-n">13</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>AIに聞いてみよう！我が家の献立アイ...</div></td></tr><tr><td class="dc "><div class="dn ">14</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>時間管理とタスク管理のデジタル術 w...</div></td><td class="dc "><div class="dn ">15</div></td><td class="dc "><div class="dn ">16</div></td><td class="dc "><div class="dn ">17</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>2030年、あなたのお宅のデジタル環...</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>AIと一緒に見つける、わが家の『新し...</div></td><td class="dc "><div class="dn ">18</div></td><td class="dc sat-bg"><div class="dn sat-n">19</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>写真で自己紹介ギャラリー 写真整理協...</div></td><td class="dc sun-bg"><div class="dn sun-n">20</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>初心者からでも安心！AIと一緒に学ぶ...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>〈AI中級〉AIでダイエット成功?!...</div></td></tr><tr><td class="dc "><div class="dn ">21</div></td><td class="dc "><div class="dn ">22</div></td><td class="dc "><div class="dn ">23</div></td><td class="dc "><div class="dn ">24</div></td><td class="dc "><div class="dn ">25</div></td><td class="dc sat-bg"><div class="dn sat-n">26</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>AIって何ができるの？危険じゃないの...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>初めてのwebサイト作成入門</div><div class="ev"><span class="dot" style="background:#7eb5e8;"></span>スマホのコンシェルジュ『Gemini...</div></td><td class="dc sun-bg"><div class="dn sun-n">27</div><div class="ev"><span class="dot" style="background:#e8889e;"></span>私をアップデート！毎日がもっと輝く『...</div><div class="ev"><span class="dot" style="background:#a0cc80;"></span>プログラミング学習〜スクラッチで自分...</div></td></tr><tr><td class="dc "><div class="dn ">28</div></td><td class="dc "><div class="dn ">29</div></td><td class="dc "><div class="dn ">30</div></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td><td class="dc empty"></td></tr></tbody>
+        </table>
+        <div class="bottom-bar">
+            <div class="notice">
+                <div class="notice-label">注意事項</div>
+                <div class="notice-text">天候等により、開催内容やスケジュールが変更になる可能性がございます。最新情報は随時ご確認ください。</div>
+            </div>
+            <div class="contact">
+                <div class="contact-label">お申込み</div>
+                <div class="contact-text">北総校 富里キャンパス</div>
+            </div>
+        </div>
+    </div>
+
+    <div class="page detail-page">
+        <div class="detail-header">
+            <span class="detail-ym">2026年9月</span>
+            <span class="detail-title">イベント詳細スケジュール</span>
+            <span class="detail-count">全16件</span>
+        </div>
+        <table class="detail-table">
+            <thead>
+                <tr>
+                    <th class="dth" style="width:10%;">日付</th>
+                    <th class="dth" style="width:8%;">開始時間</th>
+                    <th class="dth" style="width:8%;">会場</th>
+                    <th class="dth" style="width:48%;">講座名</th>
+                    <th class="dth" style="width:26%;">サークル名</th>
+                </tr>
+            </thead>
+            <tbody><tr class="v-kamagaya">
+            <td class="dt-date">9/5(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">写真と短い動画で、日常を楽しく残そう（Instagram体験）</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/6(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">リズム×論理思考〜太鼓で学ぶ集中と運動分析〜</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/10(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">明日から使える！AIプレゼン資料作成～アイデア出しからデザインまでをAIに任せる新常識</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">9/12(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">「2030年、あなたのお宅のデジタル環境はどう変わる？〜今から始める家族の安全投資〜」</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">9/13(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">AIに聞いてみよう！我が家の献立アイデア</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/14(月)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">時間管理とタスク管理のデジタル術 with NotebookLM</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/17(木)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">2030年、あなたのお宅のデジタル環境はどう変わる？〜今から始める家族の安全投資〜</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">9/17(木)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">AIと一緒に見つける、わが家の『新しい定番』〜献立作りから旅行計画まで〜</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/19(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">写真で自己紹介ギャラリー 写真整理協会</td>
+            <td class="dt-circle">学びの写真メディア活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/20(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">初心者からでも安心！AIと一緒に学ぶ、Googleマップ集客MEO対策 勉強会</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">9/20(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">〈AI中級〉AIでダイエット成功?!身体管理のコツ</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/26(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">AIって何ができるの？危険じゃないの？〜お茶の間で役立つ、失敗しないためのAIリテラシー入門〜</td>
+            <td class="dt-circle">学びのデジタル安全生活サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">9/26(土)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">初めてのwebサイト作成入門</td>
+            <td class="dt-circle">学びの商店主・個人事業主サークル</td>
+        </tr><tr class="v-narita">
+            <td class="dt-date">9/26(土)</td>
+            <td class="dt-time">15:00</td>
+            <td class="dt-venue">成田</td>
+            <td class="dt-title">スマホのコンシェルジュ『Gemini』と仲良くなろう！〜暮らしの困りごと解決サークル〜</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-tomisato">
+            <td class="dt-date">9/27(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">富里</td>
+            <td class="dt-title">私をアップデート！毎日がもっと輝く『やることリスト』 with Gemini</td>
+            <td class="dt-circle">学びのAIくらし活用サークル</td>
+        </tr><tr class="v-kamagaya">
+            <td class="dt-date">9/27(日)</td>
+            <td class="dt-time">13:00</td>
+            <td class="dt-venue">鎌ヶ谷</td>
+            <td class="dt-title">プログラミング学習〜スクラッチで自分だけのゲームを作ってみよう〜</td>
+            <td class="dt-circle">学びのE-Sportsサークル</td>
+        </tr></tbody>
+        </table>
+    </div>
+    
+</body>
+</html>
