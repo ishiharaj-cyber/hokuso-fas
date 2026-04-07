@@ -1,0 +1,44 @@
+// ========================================
+// プレゼン資料アップロード用 GAS
+// ========================================
+//
+// 【設定手順】
+// 1. 新しいApps Scriptプロジェクトを作成
+// 2. このコードを貼り付け
+// 3.「デプロイ」→「新しいデプロイ」→「ウェブアプリ」
+//    - 実行するユーザー: 自分
+//    - アクセスできるユーザー: 全員
+// 4. デプロイURLをindex.htmlのGAS_UPLOAD_URLに設定
+// ========================================
+
+var FOLDER_ID = '1DlLDfaNYv5OHF96RO8qv2906wDQnJbA6'; // 2026年度イベントフォルダ
+
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+
+  // 親フォルダ（2026年度イベント）を取得
+  var parentFolder = DriveApp.getFolderById(FOLDER_ID);
+
+  // イベントごとのサブフォルダを探す
+  var subFolderName = data.folderName;
+  var subFolders = parentFolder.getFoldersByName(subFolderName);
+  var folder;
+  if (subFolders.hasNext()) {
+    folder = subFolders.next();
+  } else {
+    folder = parentFolder.createFolder(subFolderName);
+  }
+
+  // Base64データをファイルに変換して保存
+  var blob = Utilities.newBlob(
+    Utilities.base64Decode(data.base64),
+    data.mimeType,
+    data.fileName
+  );
+  var file = folder.createFile(blob);
+
+  return ContentService.createTextOutput(JSON.stringify({
+    success: true,
+    url: file.getUrl()
+  })).setMimeType(ContentService.MimeType.JSON);
+}

@@ -127,6 +127,12 @@ body {
 .chip-icon { flex-shrink: 0; font-size: 10px; }
 .chip-text { word-break: break-word; }
 .chip-venue { font-size: 8px; opacity: 0.7; margin-left: 2px; }
+.chip-reserve {
+    display: inline-block; font-family: "Quicksand", sans-serif;
+    font-size: 9px; font-weight: 700; color: #fff; background: #e0879e;
+    padding: 1px 5px; border-radius: 6px; margin-left: 3px; white-space: nowrap;
+    letter-spacing: 0.3px;
+}
 
 /* 会場別：背景色（淡め） + 左ボーダー */
 .event-chip.tomisato { background: #fce8ed; border-left-color: #e8889e; }
@@ -236,6 +242,21 @@ body {
 }
 .google-form-link a { color: #9a80b0; text-decoration: underline; }
 
+/* アップロード */
+.upload-section { margin-top: 14px; }
+.btn-upload-label {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    width: 100%; padding: 12px; margin-top: 8px;
+    background: linear-gradient(135deg, #fef0e5, #fde8d8); color: #c09060;
+    border: 1.5px dashed #e0c8a0; border-radius: 14px; font-size: 13px;
+    font-weight: 600; font-family: inherit; cursor: pointer; transition: all 0.2s;
+}
+.btn-upload-label:hover { background: linear-gradient(135deg, #fde8d8, #fce0c8); transform: translateY(-1px); box-shadow: 0 4px 12px rgba(192,144,96,0.2); }
+.upload-progress { margin-top: 8px; font-size: 12px; color: #a090b0; text-align: center; display: none; }
+.upload-progress.show { display: block; }
+.upload-success { color: #2e7d32; background: #e8f5e9; padding: 8px 12px; border-radius: 10px; font-size: 12px; margin-top: 8px; display: none; text-align: center; }
+.upload-success.show { display: block; }
+
 .footer { text-align: center; padding: 30px; color: #c0b0d0; font-size: 12px; letter-spacing: 1px; }
 
 @media (max-width: 900px) {
@@ -279,31 +300,47 @@ body {
         <div class="modal-circle" id="modalCircle"></div>
         <div class="modal-meta" id="modalMeta"></div>
         <div class="modal-links" id="modalLinks"></div>
-        <button class="btn-toggle-form" onclick="toggleReserveForm()" style="background:linear-gradient(135deg,#e8f5e9,#e0f0e4);color:#4a8a60;border-color:#c0e0c8;">&#x1F4CB; &#x53C2;&#x52A0;&#x4E88;&#x7D04;&#x3092;&#x5165;&#x529B;&#x3059;&#x308B;</button>
+        <div class="upload-section">
+            <label class="btn-upload-label" for="fileUpload">📎 プレゼン資料をアップロード</label>
+            <input type="file" id="fileUpload" accept=".pdf,.pptx,.ppt,.key" style="display:none;" onchange="uploadPresentation(this)">
+            <div class="upload-progress" id="uploadProgress">📤 アップロード中...</div>
+            <div class="upload-success" id="uploadSuccess"></div>
+        </div>
+        <button class="btn-toggle-form" onclick="toggleReserveForm()" style="background:linear-gradient(135deg,#e8f5e9,#e0f0e4);color:#4a8a60;border-color:#c0e0c8;">📋 参加予約を入力する</button>
         <div class="report-form" id="reserveForm" style="display:none;">
-            <h3 style="color:#4a8a60;">&#x1F4CB; &#x53C2;&#x52A0;&#x4E88;&#x7D04;</h3>
+            <h3 style="color:#4a8a60;">&#x1F4CB; 参加予約</h3>
             <div id="currentTotal" style="background:linear-gradient(135deg,#e8f5e9,#f1f8f2);padding:12px 16px;border-radius:12px;margin-bottom:12px;font-size:13px;color:#4a8a60;display:none;">
-                <div style="font-size:11px;color:#80a890;margin-bottom:4px;">&#x73FE;&#x5728;&#x306E;&#x5408;&#x8A08;</div>
-                <span id="totalGroupsDisplay">-</span>&#x7D44; / <span id="totalPeopleDisplay">-</span>&#x4EBA;
+                <div style="font-size:11px;color:#80a890;margin-bottom:4px;">現在の合計</div>
+                <span id="totalGroupsDisplay">-</span>組 / <span id="totalPeopleDisplay">-</span>人
+                <div id="reserverNames" style="margin-top:6px;padding-top:6px;border-top:1px dashed #c0e0c8;display:none;">
+                    <div style="font-size:11px;color:#80a890;margin-bottom:4px;">予約プランナー</div>
+                    <div id="reserverNamesList" style="font-size:12px;line-height:1.6;"></div>
+                </div>
                 <div id="afterTotal" style="margin-top:6px;padding-top:6px;border-top:1px dashed #c0e0c8;display:none;">
-                    <div style="font-size:11px;color:#80a890;margin-bottom:4px;">&#x2192; &#x9001;&#x4FE1;&#x5F8C;&#x306E;&#x5408;&#x8A08;</div>
-                    <strong><span id="afterGroupsDisplay">-</span>&#x7D44; / <span id="afterPeopleDisplay">-</span>&#x4EBA;</strong>
+                    <div style="font-size:11px;color:#80a890;margin-bottom:4px;">→ 送信後の合計</div>
+                    <strong><span id="afterGroupsDisplay">-</span>組 / <span id="afterPeopleDisplay">-</span>人</strong>
+                </div>
+            </div>
+            <div class="form-row full">
+                <div class="form-group">
+                    <label>プランナー名</label>
+                    <input type="text" id="rPlannerName" placeholder="あなたの名前を入力">
                 </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>&#x53C2;&#x52A0;&#x4E88;&#x5B9A;&#x7D44;&#x6570;</label>
+                    <label>参加予定組数</label>
                     <input type="number" id="rGroupCount" placeholder="0">
                 </div>
                 <div class="form-group">
-                    <label>&#x53C2;&#x52A0;&#x4E88;&#x5B9A;&#x4EBA;&#x6570;</label>
+                    <label>参加予定人数</label>
                     <input type="number" id="rParticipantCount" placeholder="0">
                 </div>
             </div>
             <div class="form-row full">
                 <div class="form-group">
-                    <label>&#x898B;&#x8FBC;&#x307F;&#x30A2;&#x30BB;&#x30C3;&#x30C8;</label>
-                    <input type="text" id="rAsset" placeholder="&#x898B;&#x8FBC;&#x307F;&#x30A2;&#x30BB;&#x30C3;&#x30C8;&#x3092;&#x5165;&#x529B;">
+                    <label>見込みアセット</label>
+                    <input type="text" id="rAsset" placeholder="見込みアセットを入力">
                 </div>
             </div>
             <button class="btn-submit" id="btnReserve" onclick="submitReserve()" style="background:linear-gradient(135deg,#80c8a0,#60b888);">&#x9001;&#x4FE1;&#x3059;&#x308B;</button>
@@ -456,7 +493,8 @@ months.forEach((month, i) => {
                 const chip = document.createElement('a');
                 chip.className = 'event-chip ' + venueClass(ev.venue) + ' ' + genreClass(ev.circle);
                 const icon = venueIcon(ev.venue);
-                chip.innerHTML = '<span class="chip-icon">' + icon + '</span><span class="chip-text">' + ev.title + '</span>';
+                var eventKey = ev.date + ' ' + ev.venue + ' ' + ev.title;
+                chip.innerHTML = '<span class="chip-icon">' + icon + '</span><span class="chip-text">' + ev.title + '<span class="chip-reserve" data-event="' + eventKey.replace(/"/g,'&quot;') + '"></span></span>';
                 chip.title = ev.title + ' / ' + ev.circle + ' / ' + ev.venue + ' ' + ev.time;
                 chip.onclick = (e) => { e.preventDefault(); openModal(ev); };
                 c.appendChild(chip);
@@ -506,13 +544,18 @@ function closeModal() {
     document.getElementById('formMessage').textContent = '';
     document.getElementById('reserveMessage').className = 'form-message';
     document.getElementById('reserveMessage').textContent = '';
+    document.getElementById('uploadProgress').className = 'upload-progress';
+    document.getElementById('uploadSuccess').className = 'upload-success';
+    document.getElementById('uploadSuccess').textContent = '';
+    document.getElementById('fileUpload').value = '';
 }
 document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); });
 
 // ===== 実績報告フォーム =====
 // ** Google Apps ScriptデプロイURL（要設定） **
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbisIu7pt-Nvu8jrYLZKKX4AdAEho1pCthoqnxxKkGPK8IP-545-1ZNbKDTnPTVVUtfw/exec';
-const GAS_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbw4gAuUqLcT8zcZgAwnfcK3wk_ekwmap0uaCEtblcnSxYZfzehRkI4C7xWdkPBIzmRa1g/exec';
+const GAS_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbydMfa44eKNBGvDU4-fifE9aG_gd0q4WEJu-UUQBCwZPXj6AO0Ccq8dREULB1x7nCwC/exec';
+const GAS_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbx_tMkYY3o-PueXc7kDVFLqFPO5Ev3CcZn5p6w_CDHAd4f4Txbly3UFUumDZcly8keL/exec';
 
 let currentEvent = null;
 
@@ -603,6 +646,22 @@ function fetchCurrentTotal() {
           currentTotalPeople = data.people || 0;
           document.getElementById('totalGroupsDisplay').textContent = currentTotalGroups;
           document.getElementById('totalPeopleDisplay').textContent = currentTotalPeople;
+          // プランナー名一覧を表示（名前＋組数）
+          var namesEl = document.getElementById('reserverNames');
+          var namesListEl = document.getElementById('reserverNamesList');
+          if (data.planners && data.planners.length > 0) {
+              namesEl.style.display = 'block';
+              namesListEl.innerHTML = data.planners.map(function(p) {
+                  return '<span style="display:inline-block;background:#d4edda;padding:2px 8px;border-radius:8px;margin:2px 3px;font-size:11px;">👤 ' + p.name + '（' + p.groups + '組）</span>';
+              }).join('');
+          } else if (data.names && data.names.length > 0) {
+              namesEl.style.display = 'block';
+              namesListEl.innerHTML = data.names.map(function(n) {
+                  return '<span style="display:inline-block;background:#d4edda;padding:2px 8px;border-radius:8px;margin:2px 3px;font-size:11px;">👤 ' + n + '</span>';
+              }).join('');
+          } else {
+              namesEl.style.display = 'none';
+          }
           updateAfterTotal();
       })
       .catch(function() {
@@ -629,6 +688,7 @@ function submitReserve() {
     btn.textContent = '\u9001\u4FE1\u4E2D...';
 
     const data = {
+        plannerName: document.getElementById('rPlannerName').value,
         groupCount: document.getElementById('rGroupCount').value,
         participantCount: document.getElementById('rParticipantCount').value,
         asset: document.getElementById('rAsset').value,
@@ -647,9 +707,12 @@ function submitReserve() {
         msg.textContent = '\u2714 \u9001\u4FE1\u5B8C\u4E86\uFF01\u30B9\u30D7\u30EC\u30C3\u30C9\u30B7\u30FC\u30C8\u306B\u8A18\u9332\u3055\u308C\u307E\u3057\u305F\u3002';
         btn.textContent = '\u9001\u4FE1\u3059\u308B';
         btn.disabled = false;
-        ['rGroupCount','rParticipantCount','rAsset'].forEach(id => {
+        ['rPlannerName','rGroupCount','rParticipantCount','rAsset'].forEach(id => {
             document.getElementById(id).value = '';
         });
+        // 送信後に合計を再取得
+        fetchCurrentTotal();
+        loadAllReserveCounts();
     })
     .catch(() => {
         const msg = document.getElementById('reserveMessage');
@@ -658,6 +721,82 @@ function submitReserve() {
         btn.textContent = '\u9001\u4FE1\u3059\u308B';
         btn.disabled = false;
     });
+}
+
+// ===== カレンダー上の予約数表示 =====
+function loadAllReserveCounts() {
+    var chips = document.querySelectorAll('.chip-reserve[data-event]');
+    var eventNames = [];
+    chips.forEach(function(chip) {
+        var name = chip.getAttribute('data-event');
+        if (eventNames.indexOf(name) === -1) eventNames.push(name);
+    });
+    eventNames.forEach(function(eventName) {
+        var url = GAS_RESERVE_URL + '?event=' + encodeURIComponent(eventName);
+        fetch(url)
+          .then(function(r) { return r.json(); })
+          .then(function(data) {
+              if (data.groups > 0 || data.people > 0) {
+                  var badges = document.querySelectorAll('.chip-reserve[data-event="' + eventName.replace(/"/g, '&quot;') + '"]');
+                  badges.forEach(function(badge) {
+                      badge.textContent = data.groups + '組 ' + data.people + '人';
+                  });
+              }
+          })
+          .catch(function() {});
+    });
+}
+loadAllReserveCounts();
+
+// ===== プレゼン資料アップロード =====
+function uploadPresentation(input) {
+    if (!input.files || !input.files[0]) return;
+    if (GAS_UPLOAD_URL === 'YOUR_UPLOAD_GAS_URL_HERE') {
+        var s = document.getElementById('uploadSuccess');
+        s.className = 'upload-success show';
+        s.style.background = '#fce4ec'; s.style.color = '#c62828';
+        s.textContent = '❌ アップロードURLが未設定です。GASの設定を確認してください。';
+        return;
+    }
+    var file = input.files[0];
+    var reader = new FileReader();
+    document.getElementById('uploadProgress').className = 'upload-progress show';
+    document.getElementById('uploadSuccess').className = 'upload-success';
+
+    reader.onload = function(e) {
+        var base64 = e.target.result.split(',')[1];
+        var data = {
+            fileName: file.name,
+            mimeType: file.type,
+            base64: base64,
+            eventDate: currentEvent.date,
+            eventVenue: currentEvent.venue,
+            eventTitle: currentEvent.title,
+            folderName: currentEvent.date.replace(/\//g, '-') + '_' + currentEvent.title + '_' + currentEvent.venue,
+        };
+
+        fetch(GAS_UPLOAD_URL, {
+            method: 'POST',
+            mode: 'no-cors',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(data),
+        })
+        .then(function() {
+            document.getElementById('uploadProgress').className = 'upload-progress';
+            var s = document.getElementById('uploadSuccess');
+            s.className = 'upload-success show';
+            s.textContent = '✔ 「' + file.name + '」をアップロードしました！';
+            input.value = '';
+        })
+        .catch(function() {
+            document.getElementById('uploadProgress').className = 'upload-progress';
+            var s = document.getElementById('uploadSuccess');
+            s.className = 'upload-success show';
+            s.style.background = '#fce4ec'; s.style.color = '#c62828';
+            s.textContent = '❌ アップロードに失敗しました。再度お試しください。';
+        });
+    };
+    reader.readAsDataURL(file);
 }
 
 </script>
