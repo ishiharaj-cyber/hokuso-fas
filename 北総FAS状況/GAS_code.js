@@ -1,6 +1,8 @@
 var SHEET_ID = "1wjKFnzeKQe6StoIHXcE08qC2bZgzgJWfywHk32o0BSw";
 var SHEET_NAME = "SL富里のコピー";
 
+var LOG_PASSWORD = "hokuso2026";
+
 function doGet(e) {
   var callback = e.parameter.callback || "";
   var action = e.parameter.action || "";
@@ -10,6 +12,8 @@ function doGet(e) {
     json = JSON.stringify(saveData(e));
   } else if (action === "totals") {
     json = JSON.stringify(readTotals());
+  } else if (action === "log") {
+    json = JSON.stringify(readLog(e));
   } else {
     json = JSON.stringify(readData(e));
   }
@@ -178,6 +182,29 @@ function addAllPlanners() {
   }
 
   return "追加完了: " + added.length + "名\n" + added.join("\n");
+}
+
+function readLog(e) {
+  var pw = e.parameter.pw || "";
+  if (pw !== LOG_PASSWORD) {
+    return { status: "error", message: "パスワードが違います" };
+  }
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var logSheet = ss.getSheetByName("変更ログ");
+  if (!logSheet) {
+    return { status: "ok", logs: [] };
+  }
+  var data = logSheet.getDataRange().getValues();
+  var logs = [];
+  for (var r = 1; r < data.length; r++) {
+    logs.push({
+      date: data[r][0] ? data[r][0].toString() : "",
+      name: data[r][1] ? data[r][1].toString() : "",
+      item: data[r][2] ? data[r][2].toString() : "",
+      value: data[r][3] !== null && data[r][3] !== "" ? data[r][3] : 0
+    });
+  }
+  return { status: "ok", logs: logs };
 }
 
 function writeLog(ss, name, values, updatedKeys) {
