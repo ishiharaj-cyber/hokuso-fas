@@ -1,0 +1,83 @@
+function doPost(e) {
+  var sheet = SpreadsheetApp.openById("1YSQGhZov0-efXPDdfAsqOTa73MWlc1cIINq7Xd47OsY").getSheetByName("Web実績");
+  var data = JSON.parse(e.postData.contents);
+  sheet.appendRow([
+    new Date(),
+    data.eventName,
+    data.groupCount,
+    data.participantCount,
+    data.vcCount,
+    data.assetCount,
+    data.pcCount,
+    data.iphoneCount,
+    data.otherCount,
+    data.issues,
+    data.measures,
+    data.instructor,
+    data.plannerCount,
+    data.plannerCost,
+    data.otherCost
+  ]);
+  return ContentService.createTextOutput("ok");
+}
+
+function extractMonthDay(str) {
+  var m1 = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m1) return parseInt(m1[2]) + "/" + parseInt(m1[3]);
+  var m2 = str.match(/(\d{1,2})\/(\d{1,2})/);
+  if (m2) return parseInt(m2[1]) + "/" + parseInt(m2[2]);
+  return null;
+}
+
+function isEventMatch(cellValue, eventName) {
+  if (!cellValue || !eventName) return false;
+  if (cellValue === eventName) return true;
+  var venues = ["富里", "成田", "鎌ヶ谷", "鎌ケ谷"];
+  var cellVenue = "";
+  var eventVenue = "";
+  for (var v = 0; v < venues.length; v++) {
+    if (cellValue.indexOf(venues[v]) >= 0) cellVenue = venues[v];
+    if (eventName.indexOf(venues[v]) >= 0) eventVenue = venues[v];
+  }
+  if (cellVenue === "鎌ケ谷") cellVenue = "鎌ヶ谷";
+  if (eventVenue === "鎌ケ谷") eventVenue = "鎌ヶ谷";
+  if (!cellVenue || !eventVenue || cellVenue !== eventVenue) return false;
+  var cellDate = extractMonthDay(cellValue);
+  var eventDate = extractMonthDay(eventName);
+  if (!cellDate || !eventDate || cellDate !== eventDate) return false;
+  return true;
+}
+
+function doGet(e) {
+  var ss = SpreadsheetApp.openById("1YSQGhZov0-efXPDdfAsqOTa73MWlc1cIINq7Xd47OsY");
+  var eventName = (e.parameter.event || "").toString().trim();
+  var result = {found: false};
+
+  // Web実績シート: B=イベント名[1], C=組数[2], D=人数[3], E=VC[4], F=アセット[5], G=PC[6], H=iPhone[7], I=その他[8], J=課題[9], K=対策[10], L=講師[11], M=プランナー数[12], N=人件費[13], O=その他開催費[14]
+  var sheets = ["Web実績", "フォームの回答 1"];
+  for (var s = 0; s < sheets.length; s++) {
+    var sheet = ss.getSheetByName(sheets[s]);
+    if (!sheet) continue;
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      var cellValue = (data[i][1] || "").toString().trim();
+      if (isEventMatch(cellValue, eventName)) {
+        result.found = true;
+        result.groupCount = (result.groupCount || 0) + Number(data[i][2] || 0);
+        result.participantCount = (result.participantCount || 0) + Number(data[i][3] || 0);
+        result.vcCount = (result.vcCount || 0) + Number(data[i][4] || 0);
+        result.assetCount = (result.assetCount || 0) + Number(data[i][5] || 0);
+        result.pcCount = (result.pcCount || 0) + Number(data[i][6] || 0);
+        result.iphoneCount = (result.iphoneCount || 0) + Number(data[i][7] || 0);
+        result.otherCount = (result.otherCount || 0) + Number(data[i][8] || 0);
+        result.issues = (data[i][9] || "").toString();
+        result.measures = (data[i][10] || "").toString();
+        result.instructor = (data[i][11] || "").toString();
+        result.plannerCount = (result.plannerCount || 0) + Number(data[i][12] || 0);
+        result.plannerCost = (result.plannerCost || 0) + Number(data[i][13] || 0);
+        result.otherCost = (result.otherCost || 0) + Number(data[i][14] || 0);
+      }
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}

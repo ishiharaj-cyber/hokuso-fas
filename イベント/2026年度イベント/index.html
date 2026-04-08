@@ -147,10 +147,10 @@ body {
 .event-chip.genre-photo    { color: #b87818; }
 .event-chip.genre-esports  { color: #7838a8; }
 
-/* セミナー・体験会：丸みのあるカプセル型で差別化 */
+/* セミナー・体験会：カプセル型＋会場別カラー */
 .event-chip.seminar {
     border-left: none;
-    border: 1.5px solid #c8960a;
+    border: 2px solid #c8960a;
     border-radius: 50px;
     background: linear-gradient(135deg, #fff8eb, #fef0d0, #fde8c0);
     color: #8a6010;
@@ -160,14 +160,31 @@ body {
     box-shadow: 0 1px 6px rgba(200, 134, 10, 0.15);
     text-align: center;
 }
+.event-chip.seminar.tomisato {
+    border-color: #e8889e;
+    background: linear-gradient(135deg, #fff0f3, #fce8ed, #fbe0e6);
+    color: #a0506a;
+}
+.event-chip.seminar.narita {
+    border-color: #7eb5e8;
+    background: linear-gradient(135deg, #f0f6ff, #e4f0fc, #d8e8f8);
+    color: #3a6a9a;
+}
+.event-chip.seminar.kamagaya {
+    border-color: #a0cc80;
+    background: linear-gradient(135deg, #f2faf0, #e6f5e4, #daf0d6);
+    color: #3a7a30;
+}
 .event-chip.seminar:hover {
-    background: linear-gradient(135deg, #fef0d0, #fde8c0, #fce0b0);
-    box-shadow: 0 3px 10px rgba(200, 134, 10, 0.25);
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.15);
     transform: scale(1.03);
 }
 .event-chip.seminar .chip-reserve {
     background: #c8860a; color: #fff;
 }
+.event-chip.seminar.tomisato .chip-reserve { background: #e8889e; }
+.event-chip.seminar.narita .chip-reserve { background: #7eb5e8; }
+.event-chip.seminar.kamagaya .chip-reserve { background: #a0cc80; }
 
 /* モーダル */
 .modal-overlay {
@@ -324,6 +341,10 @@ body {
         <div class="modal-circle" id="modalCircle"></div>
         <div class="modal-meta" id="modalMeta"></div>
         <div class="modal-links" id="modalLinks"></div>
+        <div id="reportResult" style="background:linear-gradient(135deg,#f3eef6,#ede5f2);padding:14px 16px;border-radius:14px;margin-top:14px;font-size:13px;color:#6a5a80;display:none;border:1.5px solid #e4d8ee;">
+            <div style="font-size:12px;color:#8a70a8;margin-bottom:8px;font-weight:600;">✅ 実績報告済み</div>
+            <div id="reportResultContent"></div>
+        </div>
         <div class="upload-section">
             <label class="btn-upload-label" for="fileUpload">📎 プレゼン資料をアップロード</label>
             <input type="file" id="fileUpload" accept=".pdf,.pptx,.ppt,.key" style="display:none;" onchange="uploadPresentation(this)">
@@ -372,47 +393,77 @@ body {
         </div>
         <button class="btn-toggle-form" onclick="toggleForm()">&#x1F4DD; &#x5B9F;&#x7E3E;&#x5831;&#x544A;&#x3092;&#x5165;&#x529B;&#x3059;&#x308B;</button>
         <div class="report-form" id="reportForm" style="display:none;">
-            <h3>&#x1F4CB; &#x5B9F;&#x7E3E;&#x5831;&#x544A;</h3>
+            <h3>📋 実績報告</h3>
             <div class="form-row">
                 <div class="form-group">
-                    <label>&#x30A4;&#x30D9;&#x30F3;&#x30C8;&#x8B1B;&#x5E2B;</label>
-                    <input type="text" id="fInstructor" placeholder="&#x8B1B;&#x5E2B;&#x540D;">
-                </div>
-                <div class="form-group">
-                    <label>&#x8B1B;&#x5E2B;&#x30D7;&#x30E9;&#x30F3;&#x30CA;&#x30FC;&#x4EBA;&#x6570;</label>
-                    <input type="number" id="fPlannerCount" placeholder="0">
-                </div>
-            </div>
-            <div class="form-row">
-                <div class="form-group">
-                    <label>&#x8B1B;&#x5E2B;&#x30D7;&#x30E9;&#x30F3;&#x30CA;&#x30FC;&#x4EBA;&#x4EF6;&#x8CBB;</label>
-                    <input type="number" id="fPlannerCost" placeholder="0">
-                </div>
-                <div class="form-group">
-                    <label>&#x53C2;&#x52A0;&#x7D44;&#x6570;</label>
+                    <label>参加組数</label>
                     <input type="number" id="fGroupCount" placeholder="0">
                 </div>
+                <div class="form-group">
+                    <label>参加人数</label>
+                    <input type="number" id="fParticipantCount" placeholder="0">
+                </div>
             </div>
             <div class="form-row">
                 <div class="form-group">
-                    <label>&#x53C2;&#x52A0;&#x4EBA;&#x6570;</label>
-                    <input type="number" id="fParticipantCount" placeholder="0">
+                    <label>VC件数</label>
+                    <input type="number" id="fVcCount" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>アセット実績数</label>
+                    <input type="number" id="fAssetCount" placeholder="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>うちPC数</label>
+                    <input type="number" id="fPcCount" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>うちiPhone数</label>
+                    <input type="number" id="fIphoneCount" placeholder="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>その他数</label>
+                    <input type="number" id="fOtherCount" placeholder="0">
                 </div>
                 <div class="form-group"></div>
             </div>
             <div class="form-row full">
                 <div class="form-group">
-                    <label>&#x5B9F;&#x7E3E;</label>
-                    <textarea id="fAchievement" placeholder="&#x5B9F;&#x7E3E;&#x5185;&#x5BB9;&#x3092;&#x5165;&#x529B;"></textarea>
+                    <label>課題</label>
+                    <textarea id="fIssues" placeholder="課題を入力"></textarea>
                 </div>
             </div>
             <div class="form-row full">
                 <div class="form-group">
-                    <label>&#x8AB2;&#x984C;&#x3068;&#x5BFE;&#x7B56;</label>
-                    <textarea id="fIssues" placeholder="&#x8AB2;&#x984C;&#x3068;&#x5BFE;&#x7B56;&#x3092;&#x5165;&#x529B;"></textarea>
+                    <label>対策</label>
+                    <textarea id="fMeasures" placeholder="対策を入力"></textarea>
                 </div>
             </div>
-            <button class="btn-submit" id="btnSubmit" onclick="submitReport()">&#x9001;&#x4FE1;&#x3059;&#x308B;</button>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>講師名</label>
+                    <input type="text" id="fInstructor" placeholder="講師名">
+                </div>
+                <div class="form-group">
+                    <label>プランナー数</label>
+                    <input type="number" id="fPlannerCount" placeholder="0">
+                </div>
+            </div>
+            <div class="form-row">
+                <div class="form-group">
+                    <label>人件費</label>
+                    <input type="number" id="fPlannerCost" placeholder="0">
+                </div>
+                <div class="form-group">
+                    <label>その他開催費</label>
+                    <input type="number" id="fOtherCost" placeholder="0">
+                </div>
+            </div>
+            <button class="btn-submit" id="btnSubmit" onclick="submitReport()">送信する</button>
             <div class="form-message" id="formMessage"></div>
             <div class="google-form-link">
                 &#x307E;&#x305F;&#x306F; <a href="https://docs.google.com/forms/d/1sS4n-kmNd4BOQdd6BUSe31_cOcXK_k36ok2DuJjN-iA/viewform" target="_blank">Google&#x30D5;&#x30A9;&#x30FC;&#x30E0;</a> &#x304B;&#x3089;&#x3082;&#x5165;&#x529B;&#x3067;&#x304D;&#x307E;&#x3059;
@@ -560,8 +611,11 @@ function openModal(ev) {
         '<a href="'+ev.folder+'/report.html" class="btn-report">\u{1F4C4} \u30EC\u30DD\u30FC\u30C8\u3092\u898B\u308B</a>' +
         '<a href="'+ev.folder+'/presentation.pdf" class="btn-pres">\u{1F4CA} \u30D7\u30EC\u30BC\u30F3\u8CC7\u6599</a>';
     document.getElementById('modal').classList.add('show');
+    // 実績報告済みか自動チェック
+    fetchReportResult();
 }
 function closeModal() {
+    document.getElementById('reportResult').style.display = 'none';
     document.getElementById('modal').classList.remove('show');
     document.getElementById('reportForm').style.display = 'none';
     document.getElementById('reserveForm').style.display = 'none';
@@ -578,7 +632,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); }
 
 // ===== 実績報告フォーム =====
 // ** Google Apps ScriptデプロイURL（要設定） **
-const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbisIu7pt-Nvu8jrYLZKKX4AdAEho1pCthoqnxxKkGPK8IP-545-1ZNbKDTnPTVVUtfw/exec';
+const GAS_URL = 'https://script.google.com/macros/s/AKfycbyjdghLdeVywGhH9wkb0JRXWkg1O6Z2GW131oANSEzyXDEiWUiWyi6nBd26Re-KiuwIIw/exec';
 const GAS_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbx1OoqdsQyKEjjeGVtpXxQhIdDz0iagFrJHi-esMkLcZPZMzB_FbhM80jZYjM_hJPk/exec';
 const GAS_SEMINAR_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbwdPapeI58usT-CWhuTmr_D_nmDEhNdCWp8JaJRNDWE-9tSYbA-0Tzo3uMoqgS0kPv9/exec';
 const GAS_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbx_tMkYY3o-PueXc7kDVFLqFPO5Ev3CcZn5p6w_CDHAd4f4Txbly3UFUumDZcly8keL/exec';
@@ -587,30 +641,58 @@ let currentEvent = null;
 
 function toggleForm() {
     const form = document.getElementById('reportForm');
-    form.style.display = form.style.display === 'none' ? 'block' : 'none';
+    if (form.style.display === 'none') {
+        form.style.display = 'block';
+        fetchReportResult();
+    } else {
+        form.style.display = 'none';
+    }
+}
+
+function fetchReportResult() {
+    var eventName = currentEvent.date + ' ' + currentEvent.venue + ' ' + currentEvent.title;
+    var url = GAS_URL + '?event=' + encodeURIComponent(eventName);
+    var resultEl = document.getElementById('reportResult');
+    var contentEl = document.getElementById('reportResultContent');
+    resultEl.style.display = 'none';
+
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+          if (data.found) {
+              resultEl.style.display = 'block';
+              contentEl.innerHTML =
+                  '<div>参加: <strong>' + data.groupCount + '組 ' + data.participantCount + '人</strong></div>' +
+                  '<div>VC: ' + data.vcCount + '件 / アセット: ' + data.assetCount + '</div>' +
+                  '<div>PC: ' + data.pcCount + ' / iPhone: ' + data.iphoneCount + ' / その他: ' + data.otherCount + '</div>' +
+                  (data.issues ? '<div>課題: ' + data.issues + '</div>' : '') +
+                  (data.measures ? '<div>対策: ' + data.measures + '</div>' : '') +
+                  '<div>講師: ' + data.instructor + ' / プランナー: ' + data.plannerCount + '名</div>';
+          }
+      })
+      .catch(function() {});
 }
 
 function submitReport() {
-    if (GAS_URL === 'YOUR_GAS_URL_HERE') {
-        showFormMessage('error', 'Google Apps ScriptのURLが未設定です。設置手順を確認してください。');
-        return;
-    }
     const btn = document.getElementById('btnSubmit');
     btn.disabled = true;
-    btn.textContent = '\u9001\u4FE1\u4E2D...';
+    btn.textContent = '送信中...';
 
     const data = {
-        eventDate: currentEvent.date,
-        eventVenue: currentEvent.venue,
-        eventTitle: currentEvent.title,
-        eventCircle: currentEvent.circle,
+        eventName: currentEvent.date + ' ' + currentEvent.venue + ' ' + currentEvent.title,
+        groupCount: document.getElementById('fGroupCount').value,
+        participantCount: document.getElementById('fParticipantCount').value,
+        vcCount: document.getElementById('fVcCount').value,
+        assetCount: document.getElementById('fAssetCount').value,
+        pcCount: document.getElementById('fPcCount').value,
+        iphoneCount: document.getElementById('fIphoneCount').value,
+        otherCount: document.getElementById('fOtherCount').value,
+        issues: document.getElementById('fIssues').value,
+        measures: document.getElementById('fMeasures').value,
         instructor: document.getElementById('fInstructor').value,
         plannerCount: document.getElementById('fPlannerCount').value,
         plannerCost: document.getElementById('fPlannerCost').value,
-        groupCount: document.getElementById('fGroupCount').value,
-        participantCount: document.getElementById('fParticipantCount').value,
-        achievement: document.getElementById('fAchievement').value,
-        issues: document.getElementById('fIssues').value,
+        otherCost: document.getElementById('fOtherCost').value,
     };
 
     fetch(GAS_URL, {
@@ -620,11 +702,11 @@ function submitReport() {
         body: JSON.stringify(data),
     })
     .then(() => {
-        showFormMessage('success', '\u2714 \u9001\u4FE1\u5B8C\u4E86\uFF01\u30B9\u30D7\u30EC\u30C3\u30C9\u30B7\u30FC\u30C8\u306B\u8A18\u9332\u3055\u308C\u307E\u3057\u305F\u3002');
-        btn.textContent = '\u9001\u4FE1\u3059\u308B';
+        showFormMessage('success', '✔ 送信完了！スプレッドシートに記録されました。');
+        btn.textContent = '送信する';
         btn.disabled = false;
-        // フォームリセット
-        ['fInstructor','fPlannerCount','fPlannerCost','fGroupCount','fParticipantCount','fAchievement','fIssues'].forEach(id => {
+        fetchReportResult();
+        ['fGroupCount','fParticipantCount','fVcCount','fAssetCount','fPcCount','fIphoneCount','fOtherCount','fIssues','fMeasures','fInstructor','fPlannerCount','fPlannerCost','fOtherCost'].forEach(id => {
             document.getElementById(id).value = '';
         });
     })
