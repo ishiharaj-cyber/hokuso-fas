@@ -424,44 +424,41 @@ function filter() {
     document.getElementById('sPeople').textContent = shown;
 }
 
-// スプレッドシートから集計値を取得してトップページに表示
+// スプレッドシートから集計値を取得してトップページに表示（JSONP方式）
 function loadTotals() {
-    fetch(GAS_URL + "?action=totals")
-      .then(function(r) { return r.json(); })
-      .then(function(data) {
-          var planners = data.planners || data;
-          var totalCust = 0, totalVC = 0;
-          var matched = 0;
+    var script = document.createElement("script");
+    script.src = GAS_URL + "?action=totals&callback=onTotalsLoaded";
+    document.body.appendChild(script);
+}
 
-          document.querySelectorAll('.p-icon').forEach(function(el) {
-              var name = el.dataset.n;
-              var d = planners[name] || planners[name.replace(/\s/g, "")];
-              if (!d) return;
-              matched++;
+function onTotalsLoaded(data) {
+    var planners = data.planners || data;
+    var totalCust = 0, totalDX = 0;
 
-              var cust = Number(d.cust || d["担当軒数"]) || 0;
-              var people = Number(d.people || d["担当人数"]) || 0;
-              var ao = Number(d.ao || d["内AO生"]) || 0;
-              var dx = Number(d.dx || d["VC"]) || 0;
+    document.querySelectorAll('.p-icon').forEach(function(el) {
+        var name = el.dataset.n;
+        var d = planners[name] || planners[name.replace(/\s/g, "")];
+        if (!d) return;
 
-              totalCust += cust;
-              totalVC += dx;
+        var cust = Number(d.cust) || 0;
+        var people = Number(d.people) || 0;
+        var ao = Number(d.ao) || 0;
+        var dx = Number(d.dx) || 0;
 
-              var nums = el.querySelector('.nums');
-              if (nums) {
-                  nums.innerHTML = '<span class="n-k">軒' + cust + '</span>'
-                      + '<span class="n-p">人' + people + '</span>'
-                      + '<span class="n-a">AO' + ao + '</span>'
-                      + '<span class="n-d">DX' + dx + '</span>';
-              }
-          });
+        totalCust += cust;
+        totalDX += dx;
 
-          document.getElementById('sCust').textContent = data.totalCust || totalCust;
-          document.getElementById('sVC').textContent = data.totalVC || totalVC;
-      })
-      .catch(function(err) {
-          console.error("集計取得エラー:", err);
-      });
+        var nums = el.querySelector('.nums');
+        if (nums) {
+            nums.innerHTML = '<span class="n-k">軒' + cust + '</span>'
+                + '<span class="n-p">人' + people + '</span>'
+                + '<span class="n-a">AO' + ao + '</span>'
+                + '<span class="n-d">DX' + dx + '</span>';
+        }
+    });
+
+    document.getElementById('sCust').textContent = totalCust;
+    document.getElementById('sVC').textContent = totalDX;
 }
 
 // ページ読み込み時に集計を取得
