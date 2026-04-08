@@ -152,18 +152,18 @@ body {
     border-left: none;
     border: 2px solid #d4a017;
     border-radius: 20px;
-    background: linear-gradient(135deg, #1a1a2e, #16213e);
+    background: linear-gradient(135deg, #3a3a50, #4a4a65);
     color: #ffd700;
     font-weight: 700;
     font-size: 11px;
     letter-spacing: 0.5px;
     padding: 5px 10px;
-    box-shadow: 0 2px 8px rgba(26, 26, 46, 0.3);
-    text-shadow: 0 1px 2px rgba(0,0,0,0.2);
+    box-shadow: 0 2px 8px rgba(58, 58, 80, 0.25);
+    text-shadow: 0 1px 2px rgba(0,0,0,0.15);
 }
 .event-chip.seminar:hover {
-    background: linear-gradient(135deg, #16213e, #0f3460);
-    box-shadow: 0 4px 12px rgba(26, 26, 46, 0.4);
+    background: linear-gradient(135deg, #4a4a65, #3a3a55);
+    box-shadow: 0 4px 12px rgba(58, 58, 80, 0.35);
     transform: scale(1.04);
 }
 .event-chip.seminar .chip-icon { filter: none; }
@@ -451,7 +451,7 @@ function venueIcon(v) {
 
 const monthNames = {4:'April',5:'May',6:'June',7:'July',8:'August',9:'September'};
 const monthNamesJa = {4:'4\u6708',5:'5\u6708',6:'6\u6708',7:'7\u6708',8:'8\u6708',9:'9\u6708'};
-const dayLabels = ['\u65E5','\u6708','\u706B','\u6C34','\u6728','\u91D1','\u571F'];
+const dayLabels = ['\u6708','\u706B','\u6C34','\u6728','\u91D1','\u571F','\u65E5'];
 const months = [4,5,6,7,8,9];
 
 const navEl = document.getElementById('monthNav');
@@ -479,14 +479,14 @@ months.forEach((month, i) => {
 
     dayLabels.forEach((d, di) => {
         const h = document.createElement('div');
-        h.className = 'day-header' + (di===0?' sun':'') + (di===6?' sat':'');
+        h.className = 'day-header' + (di===6?' sun':'') + (di===5?' sat':'');
         h.textContent = d;
         grid.appendChild(h);
     });
 
     const firstDay = new Date(2026, month-1, 1);
     const lastDate = new Date(2026, month, 0).getDate();
-    const startDow = firstDay.getDay();
+    const startDow = (firstDay.getDay() + 6) % 7; // 月曜=0, 日曜=6
 
     const me = {};
     events.forEach(ev => {
@@ -505,9 +505,9 @@ months.forEach((month, i) => {
     }
 
     for (let d = 1; d <= lastDate; d++) {
-        const dow = (startDow + d - 1) % 7;
+        const dow = (startDow + d - 1) % 7; // 月曜=0, 日曜=6
         const c = document.createElement('div');
-        c.className = 'day-cell' + (dow===0?' sun-bg':'') + (dow===6?' sat-bg':'');
+        c.className = 'day-cell' + (dow===6?' sun-bg':'') + (dow===5?' sat-bg':'');
 
         const num = document.createElement('div');
         num.className = 'day-number';
@@ -521,7 +521,7 @@ months.forEach((month, i) => {
                 chip.className = 'event-chip ' + venueClass(ev.venue) + (isSeminar ? ' seminar' : ' ' + genreClass(ev.circle));
                 const icon = isSeminar ? '⭐' : venueIcon(ev.venue);
                 var eventKey = ev.date + ' ' + ev.venue + ' ' + ev.title;
-                chip.innerHTML = '<span class="chip-icon">' + icon + '</span><span class="chip-text">' + ev.title + '<span class="chip-reserve" data-event="' + eventKey.replace(/"/g,'&quot;') + '"></span></span>';
+                chip.innerHTML = '<span class="chip-icon">' + icon + '</span><span class="chip-text">' + ev.title + '<span class="chip-reserve" data-event="' + eventKey.replace(/"/g,'&quot;') + '" data-type="' + (ev.type||'circle') + '"></span></span>';
                 chip.title = ev.title + ' / ' + ev.circle + ' / ' + ev.venue + ' ' + ev.time;
                 chip.onclick = (e) => { e.preventDefault(); openModal(ev); };
                 c.appendChild(chip);
@@ -582,6 +582,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); }
 // ** Google Apps ScriptデプロイURL（要設定） **
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbwbisIu7pt-Nvu8jrYLZKKX4AdAEho1pCthoqnxxKkGPK8IP-545-1ZNbKDTnPTVVUtfw/exec';
 const GAS_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbydMfa44eKNBGvDU4-fifE9aG_gd0q4WEJu-UUQBCwZPXj6AO0Ccq8dREULB1x7nCwC/exec';
+const GAS_SEMINAR_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbwdPapeI58usT-CWhuTmr_D_nmDEhNdCWp8JaJRNDWE-9tSYbA-0Tzo3uMoqgS0kPv9/exec';
 const GAS_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbx_tMkYY3o-PueXc7kDVFLqFPO5Ev3CcZn5p6w_CDHAd4f4Txbly3UFUumDZcly8keL/exec';
 
 let currentEvent = null;
@@ -658,9 +659,13 @@ function toggleReserveForm() {
     }
 }
 
+function getReserveUrl() {
+    return (currentEvent && currentEvent.type === 'seminar') ? GAS_SEMINAR_RESERVE_URL : GAS_RESERVE_URL;
+}
+
 function fetchCurrentTotal() {
     var eventName = currentEvent.date + ' ' + currentEvent.venue + ' ' + currentEvent.title;
-    var url = GAS_RESERVE_URL + '?event=' + encodeURIComponent(eventName);
+    var url = getReserveUrl() + '?event=' + encodeURIComponent(eventName);
     document.getElementById('currentTotal').style.display = 'block';
     document.getElementById('totalGroupsDisplay').textContent = '...';
     document.getElementById('totalPeopleDisplay').textContent = '...';
@@ -722,7 +727,7 @@ function submitReserve() {
         eventName: currentEvent.date + ' ' + currentEvent.venue + ' ' + currentEvent.title,
     };
 
-    fetch(GAS_RESERVE_URL, {
+    fetch(getReserveUrl(), {
         method: 'POST',
         mode: 'no-cors',
         headers: { 'Content-Type': 'application/json' },
@@ -753,18 +758,21 @@ function submitReserve() {
 // ===== カレンダー上の予約数表示 =====
 function loadAllReserveCounts() {
     var chips = document.querySelectorAll('.chip-reserve[data-event]');
-    var eventNames = [];
+    var seen = {};
     chips.forEach(function(chip) {
         var name = chip.getAttribute('data-event');
-        if (eventNames.indexOf(name) === -1) eventNames.push(name);
-    });
-    eventNames.forEach(function(eventName) {
-        var url = GAS_RESERVE_URL + '?event=' + encodeURIComponent(eventName);
+        var type = chip.getAttribute('data-type') || 'circle';
+        var key = type + '::' + name;
+        if (seen[key]) return;
+        seen[key] = true;
+        var gasUrl = (type === 'seminar') ? GAS_SEMINAR_RESERVE_URL : GAS_RESERVE_URL;
+        if (gasUrl.indexOf('YOUR_') === 0) return;
+        var url = gasUrl + '?event=' + encodeURIComponent(name);
         fetch(url)
           .then(function(r) { return r.json(); })
           .then(function(data) {
               if (data.groups > 0 || data.people > 0) {
-                  var badges = document.querySelectorAll('.chip-reserve[data-event="' + eventName.replace(/"/g, '&quot;') + '"]');
+                  var badges = document.querySelectorAll('.chip-reserve[data-event="' + name.replace(/"/g, '&quot;') + '"]');
                   badges.forEach(function(badge) {
                       badge.textContent = data.groups + '組 ' + data.people + '人';
                   });
