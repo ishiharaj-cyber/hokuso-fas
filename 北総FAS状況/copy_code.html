@@ -89,11 +89,11 @@ function readTotals() {
     var cust = Number(allData[itemRows["担当軒数"]] ? allData[itemRows["担当軒数"]][c] : 0) || 0;
     var people = Number(allData[itemRows["担当人数"]] ? allData[itemRows["担当人数"]][c] : 0) || 0;
     var ao = Number(allData[itemRows["内AO生"]] ? allData[itemRows["内AO生"]][c] : 0) || 0;
-    var vc = Number(allData[itemRows["VC"]] ? allData[itemRows["VC"]][c] : 0) || 0;
+    var dx = Number(allData[itemRows["内DX会員軒数"]] ? allData[itemRows["内DX会員軒数"]][c] : 0) || 0;
 
     totalCust += cust;
-    totalVC += vc;
-    planners[nameKey] = { cust: cust, people: people, ao: ao, dx: vc };
+    totalVC += dx;
+    planners[nameKey] = { cust: cust, people: people, ao: ao, dx: dx };
   }
 
   return { totalCust: totalCust, totalVC: totalVC, planners: planners };
