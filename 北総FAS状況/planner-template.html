@@ -440,17 +440,34 @@ function loadHistory() {
     document.body.appendChild(script);
 }
 
+function formatDateLabel(dateStr) {
+    var youbi = ["日","月","火","水","木","金","土"];
+    var parts = dateStr.split("/");
+    var d = new Date(Number(parts[0]), Number(parts[1]) - 1, Number(parts[2]));
+    return Number(parts[1]) + "/" + Number(parts[2]) + "（" + youbi[d.getDay()] + "）";
+}
+
 function onMyLogLoaded(data) {
     var area = document.getElementById("historyArea");
     if (!data || data.status === "error" || !data.logs || data.logs.length === 0) {
         area.innerHTML = '<div class="history-empty">まだ変更履歴がありません</div>';
         return;
     }
-    // 日付ごとにグループ化
-    var groups = {};
+    // 変更があった項目のみフィルター
+    var changed = [];
     for (var i = 0; i < data.logs.length; i++) {
         var log = data.logs[i];
-        var dateKey = log.date.split(" ")[0]; // "2026/04/09 12:00:00" → "2026/04/09"
+        if (String(log.oldVal) !== String(log.newVal)) changed.push(log);
+    }
+    if (changed.length === 0) {
+        area.innerHTML = '<div class="history-empty">まだ変更履歴がありません</div>';
+        return;
+    }
+    // 日付ごとにグループ化
+    var groups = {};
+    for (var i = 0; i < changed.length; i++) {
+        var log = changed[i];
+        var dateKey = log.date.split(" ")[0];
         if (!groups[dateKey]) groups[dateKey] = [];
         groups[dateKey].push(log);
     }
@@ -460,8 +477,9 @@ function onMyLogLoaded(data) {
     for (var d = 0; d < dates.length; d++) {
         var date = dates[d];
         var items = groups[date];
+        var label = formatDateLabel(date);
         html += '<div class="history-group">';
-        html += '<div class="history-date" onclick="toggleHistory(this)"><span>' + date + '（' + items.length + '件）</span><span class="arrow">▶</span></div>';
+        html += '<div class="history-date" onclick="toggleHistory(this)"><span>' + label + '  ' + items.length + '件</span><span class="arrow">▶</span></div>';
         html += '<div class="history-items">';
         for (var j = 0; j < items.length; j++) {
             var it = items[j];
