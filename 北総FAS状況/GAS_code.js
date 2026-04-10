@@ -196,17 +196,12 @@ function readMyLog(e) {
   var logSheet = ss.getSheetByName("変更ログ");
   if (!logSheet) return { status: "ok", logs: [] };
   var data = logSheet.getDataRange().getValues();
+  var displayData = logSheet.getDataRange().getDisplayValues();
   var logs = [];
   for (var r = 1; r < data.length; r++) {
     var logName = data[r][1] ? data[r][1].toString().replace(/\s/g, "") : "";
     if (logName !== name.replace(/\s/g, "")) continue;
-    var dateVal = data[r][0];
-    var dateStr = "";
-    if (dateVal instanceof Date) {
-      dateStr = Utilities.formatDate(dateVal, "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss");
-    } else {
-      dateStr = dateVal ? dateVal.toString() : "";
-    }
+    var dateStr = displayData[r][0] || "";
     logs.push({
       date: dateStr,
       item: data[r][2] ? data[r][2].toString() : "",
@@ -228,15 +223,10 @@ function readLog(e) {
     return { status: "ok", logs: [] };
   }
   var data = logSheet.getDataRange().getValues();
+  var displayData = logSheet.getDataRange().getDisplayValues();
   var logs = [];
   for (var r = 1; r < data.length; r++) {
-    var dateVal = data[r][0];
-    var dateStr = "";
-    if (dateVal instanceof Date) {
-      dateStr = Utilities.formatDate(dateVal, "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss");
-    } else {
-      dateStr = dateVal ? dateVal.toString() : "";
-    }
+    var dateStr = displayData[r][0] || "";
     logs.push({
       date: dateStr,
       name: data[r][1] ? data[r][1].toString() : "",
