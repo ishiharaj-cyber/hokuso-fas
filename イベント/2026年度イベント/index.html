@@ -608,8 +608,10 @@ function openModal(ev) {
         '<div><span class="meta-label">' + icon + ' \u4F1A\u5834</span><span class="meta-value">' + ev.venue + '</span></div>' +
         '<div><span class="meta-label">\u{1F464} \u5BFE\u8C61</span><span class="meta-value">' + (ev.member||'\u4E00\u822C') + '</span></div>';
     document.getElementById('modalLinks').innerHTML =
-        '<a href="'+ev.folder+'/report.html" class="btn-report">\u{1F4C4} \u30EC\u30DD\u30FC\u30C8\u3092\u898B\u308B</a>' +
-        '<a href="'+ev.folder+'/presentation.pdf" class="btn-pres">\u{1F4CA} \u30D7\u30EC\u30BC\u30F3\u8CC7\u6599</a>';
+        '<a href="'+ev.folder+'/report.html" class="btn-report">📄 レポートを見る</a>' +
+        '<a href="'+ev.folder+'/presentation.pdf" class="btn-pres" id="presLink">📊 プレゼン資料</a>';
+    // アップロード済みファイルがあれば差し替え
+    checkUploadedFile(ev);
     document.getElementById('modal').classList.add('show');
     // 実績報告済みか自動チェック
     fetchReportResult();
@@ -635,7 +637,7 @@ document.addEventListener('keydown', e => { if(e.key==='Escape') closeModal(); }
 const GAS_URL = 'https://script.google.com/macros/s/AKfycbyjdghLdeVywGhH9wkb0JRXWkg1O6Z2GW131oANSEzyXDEiWUiWyi6nBd26Re-KiuwIIw/exec';
 const GAS_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbx1OoqdsQyKEjjeGVtpXxQhIdDz0iagFrJHi-esMkLcZPZMzB_FbhM80jZYjM_hJPk/exec';
 const GAS_SEMINAR_RESERVE_URL = 'https://script.google.com/macros/s/AKfycbwdPapeI58usT-CWhuTmr_D_nmDEhNdCWp8JaJRNDWE-9tSYbA-0Tzo3uMoqgS0kPv9/exec';
-const GAS_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbx_tMkYY3o-PueXc7kDVFLqFPO5Ev3CcZn5p6w_CDHAd4f4Txbly3UFUumDZcly8keL/exec';
+const GAS_UPLOAD_URL = 'https://script.google.com/macros/s/AKfycbzHsEk-GGII3E0l-JHJVeCfJpQbKif5PM5dawywHCy_JljJUowTZmppknvony1jCuXh/exec';
 
 let currentEvent = null;
 
@@ -863,6 +865,28 @@ function loadAllReserveCounts() {
 }
 loadAllReserveCounts();
 
+// ===== アップロード済みファイル確認 =====
+function checkUploadedFile(ev) {
+    if (GAS_UPLOAD_URL.indexOf('YOUR_') === 0) return;
+    var folderName = ev.date.replace(/\//g, '-') + '_' + ev.title + '_' + ev.venue;
+    var url = GAS_UPLOAD_URL + '?folder=' + encodeURIComponent(folderName);
+    fetch(url)
+      .then(function(r) { return r.json(); })
+      .then(function(data) {
+          if (data.found && data.url) {
+              var presLink = document.getElementById('presLink');
+              if (presLink) {
+                  presLink.href = data.url;
+                  presLink.target = '_blank';
+                  presLink.innerHTML = '📊 ' + data.name;
+                  presLink.style.background = 'linear-gradient(135deg, #e8f5e9, #d4edda)';
+                  presLink.style.color = '#2e7d32';
+              }
+          }
+      })
+      .catch(function() {});
+}
+
 // ===== プレゼン資料アップロード =====
 function uploadPresentation(input) {
     if (!input.files || !input.files[0]) return;
@@ -902,6 +926,8 @@ function uploadPresentation(input) {
             s.className = 'upload-success show';
             s.textContent = '✔ 「' + file.name + '」をアップロードしました！';
             input.value = '';
+            // プレゼンリンクを更新
+            checkUploadedFile(currentEvent);
         })
         .catch(function() {
             document.getElementById('uploadProgress').className = 'upload-progress';

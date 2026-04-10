@@ -1,25 +1,9 @@
-// ========================================
-// プレゼン資料アップロード用 GAS
-// ========================================
-//
-// 【設定手順】
-// 1. 新しいApps Scriptプロジェクトを作成
-// 2. このコードを貼り付け
-// 3.「デプロイ」→「新しいデプロイ」→「ウェブアプリ」
-//    - 実行するユーザー: 自分
-//    - アクセスできるユーザー: 全員
-// 4. デプロイURLをindex.htmlのGAS_UPLOAD_URLに設定
-// ========================================
-
-var FOLDER_ID = '1DlLDfaNYv5OHF96RO8qv2906wDQnJbA6'; // 2026年度イベントフォルダ
+var FOLDER_ID = '1DlLDfaNYv5OHF96RO8qv2906wDQnJbA6';
 
 function doPost(e) {
   var data = JSON.parse(e.postData.contents);
-
-  // 親フォルダ（2026年度イベント）を取得
   var parentFolder = DriveApp.getFolderById(FOLDER_ID);
 
-  // イベントごとのサブフォルダを探す
   var subFolderName = data.folderName;
   var subFolders = parentFolder.getFoldersByName(subFolderName);
   var folder;
@@ -29,16 +13,72 @@ function doPost(e) {
     folder = parentFolder.createFolder(subFolderName);
   }
 
-  // Base64データをファイルに変換して保存
   var blob = Utilities.newBlob(
     Utilities.base64Decode(data.base64),
     data.mimeType,
     data.fileName
   );
   var file = folder.createFile(blob);
+  file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
 
   return ContentService.createTextOutput(JSON.stringify({
     success: true,
     url: file.getUrl()
   })).setMimeType(ContentService.MimeType.JSON);
+}
+
+function doGet(e) {
+  var folderName = (e.parameter.folder || "").toString().trim();
+  if (!folderName) {
+    return ContentService.createTextOutput(JSON.stringify({found: false})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var parentFolder = DriveApp.getFolderById(FOLDER_ID);
+
+  // 完全一致で探す
+  var subFolders = parentFolder.getFoldersByName(folderName);
+
+  // 見つからなければ部分一致で探す
+  if (!subFolders.hasNext()) {
+    var allFolders = parentFolder.getFolders();
+    while (allFolders.hasNext()) {
+      var f = allFolders.next();
+      var fName = f.getName();
+      if (fName.indexOf(folderName) >= 0 || folderName.indexOf(fName) >= 0) {
+        subFolders = parentFolder.getFoldersByName(fName);
+        break;
+      }
+    }
+  }
+
+  if (!subFolders.hasNext()) {
+    return ContentService.createTextOutput(JSON.stringify({found: false})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  var folder = subFolders.next();
+  var files = folder.getFiles();
+  var latestFile = null;
+  var latestDate = null;
+
+  while (files.hasNext()) {
+    var file = files.next();
+    var name = file.getName();
+    // 元のpresentation.pdfとreport.html以外のファイルを探す
+    if (name === "presentation.pdf" || name === "report.html") continue;
+    var created = file.getDateCreated();
+    if (!latestDate || created > latestDate) {
+      latestDate = created;
+      latestFile = file;
+    }
+  }
+
+  if (latestFile) {
+    return ContentService.createTextOutput(JSON.stringify({
+      found: true,
+      url: latestFile.getUrl(),
+      name: latestFile.getName()
+    })).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  return ContentService.createTextOutput(JSON.stringify({found: false})).setMimeType(ContentService.MimeType.JSON);
 }
