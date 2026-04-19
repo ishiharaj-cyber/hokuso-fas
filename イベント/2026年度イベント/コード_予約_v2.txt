@@ -1,20 +1,45 @@
 function doPost(e) {
-  var sheet = SpreadsheetApp.openById("1UOmKA8c2W84lKa1b2ol5S4KHf1caD8df2ioCecg1xvg").getSheetByName("Web予約");
   var data = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.openById("1UOmKA8c2W84lKa1b2ol5S4KHf1caD8df2ioCecg1xvg");
+  var sheet = ss.getSheetByName("Web予約");
+
+  // 管理者: 特定行を更新
+  if (data.action === "adminEditRow") {
+    var targetSheet = ss.getSheetByName(data.sheetName);
+    if (targetSheet) {
+      var row = data.row; // 1-indexed
+      if (data.sheetName === "Web予約") {
+        // B=組数[2], C=人数[3], G=プランナー名[7]
+        targetSheet.getRange(row, 2).setValue(Number(data.groupCount));
+        targetSheet.getRange(row, 3).setValue(Number(data.participantCount));
+        if (data.plannerName !== undefined) targetSheet.getRange(row, 7).setValue(data.plannerName);
+      } else if (data.sheetName === "フォームの回答 2") {
+        // B=プランナー名[2], D=組数[4], E=人数[5]
+        if (data.plannerName !== undefined) targetSheet.getRange(row, 2).setValue(data.plannerName);
+        targetSheet.getRange(row, 4).setValue(Number(data.groupCount));
+        targetSheet.getRange(row, 5).setValue(Number(data.participantCount));
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "updated"})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 管理者: 特定行を削除
+  if (data.action === "adminDeleteRow") {
+    var targetSheet2 = ss.getSheetByName(data.sheetName);
+    if (targetSheet2 && data.row > 1) {
+      targetSheet2.deleteRow(data.row);
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "deleted"})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 通常の予約追加
   sheet.appendRow([new Date(), data.groupCount, data.participantCount, data.asset, data.eventName, "", data.plannerName]);
   return ContentService.createTextOutput("ok");
 }
 
-// イベント名から日付・会場・タイトルのキーワードを抽出して照合
 function isEventMatch(cellValue, eventName) {
   if (!cellValue || !eventName) return false;
   if (cellValue === eventName) return true;
-
-  // Web予約形式: "2026-04-23 富里 タイトル"
-  // フォーム形式: "4/23(木) 13:00 富里 サークル名 タイトル DX"
-  // 両方から会場とタイトルの一部を抽出して比較
-
-  // 会場を抽出
   var venues = ["富里", "成田", "鎌ヶ谷", "鎌ケ谷"];
   var cellVenue = "";
   var eventVenue = "";
@@ -22,25 +47,18 @@ function isEventMatch(cellValue, eventName) {
     if (cellValue.indexOf(venues[v]) >= 0) cellVenue = venues[v];
     if (eventName.indexOf(venues[v]) >= 0) eventVenue = venues[v];
   }
-  // 鎌ヶ谷と鎌ケ谷を同一視
   if (cellVenue === "鎌ケ谷") cellVenue = "鎌ヶ谷";
   if (eventVenue === "鎌ケ谷") eventVenue = "鎌ヶ谷";
-
   if (!cellVenue || !eventVenue || cellVenue !== eventVenue) return false;
-
-  // 日付を抽出（月/日の数字で比較）
   var cellDate = extractMonthDay(cellValue);
   var eventDate = extractMonthDay(eventName);
   if (!cellDate || !eventDate || cellDate !== eventDate) return false;
-
   return true;
 }
 
 function extractMonthDay(str) {
-  // "2026-04-23" 形式
   var m1 = str.match(/(\d{4})-(\d{2})-(\d{2})/);
   if (m1) return parseInt(m1[2]) + "/" + parseInt(m1[3]);
-  // "4/23" 形式
   var m2 = str.match(/(\d{1,2})\/(\d{1,2})/);
   if (m2) return parseInt(m2[1]) + "/" + parseInt(m2[2]);
   return null;
@@ -49,11 +67,55 @@ function extractMonthDay(str) {
 function doGet(e) {
   var ss = SpreadsheetApp.openById("1UOmKA8c2W84lKa1b2ol5S4KHf1caD8df2ioCecg1xvg");
   var eventName = (e.parameter.event || "").toString().trim();
+
+  // 管理者: 個別レコード一覧を取得
+  if (e.parameter.adminList === "true") {
+    var records = [];
+
+    var sheet1 = ss.getSheetByName("Web予約");
+    if (sheet1) {
+      var data1 = sheet1.getDataRange().getValues();
+      for (var i = 1; i < data1.length; i++) {
+        var cv = (data1[i][4] || "").toString().trim();
+        if (isEventMatch(cv, eventName)) {
+          records.push({
+            sheet: "Web予約", row: i + 1,
+            date: data1[i][0] ? new Date(data1[i][0]).toLocaleString("ja-JP") : "",
+            plannerName: (data1[i][6] || "").toString(),
+            groupCount: Number(data1[i][1] || 0),
+            participantCount: Number(data1[i][2] || 0),
+            note: (data1[i][5] || "").toString()
+          });
+        }
+      }
+    }
+
+    var sheet2 = ss.getSheetByName("フォームの回答 2");
+    if (sheet2) {
+      var data2 = sheet2.getDataRange().getValues();
+      for (var j = 1; j < data2.length; j++) {
+        var cv2 = (data2[j][2] || "").toString().trim();
+        if (isEventMatch(cv2, eventName)) {
+          records.push({
+            sheet: "フォームの回答 2", row: j + 1,
+            date: data2[j][0] ? new Date(data2[j][0]).toLocaleString("ja-JP") : "",
+            plannerName: (data2[j][1] || "").toString(),
+            groupCount: Number(data2[j][3] || 0),
+            participantCount: Number(data2[j][4] || 0),
+            note: "Googleフォーム"
+          });
+        }
+      }
+    }
+
+    return ContentService.createTextOutput(JSON.stringify({records: records})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 通常: 合計を返す
   var totalGroups = 0;
   var totalPeople = 0;
   var nameGroups = {};
 
-  // Web予約シート: B=組数[1], C=人数[2], E=イベント名[4], G=プランナー名[6]
   var sheet1 = ss.getSheetByName("Web予約");
   if (sheet1) {
     var data1 = sheet1.getDataRange().getValues();
@@ -61,17 +123,14 @@ function doGet(e) {
       var cellValue = (data1[i][4] || "").toString().trim();
       if (isEventMatch(cellValue, eventName)) {
         var groups = Number(data1[i][1] || 0);
-        totalGroups = totalGroups + groups;
-        totalPeople = totalPeople + Number(data1[i][2] || 0);
+        totalGroups += groups;
+        totalPeople += Number(data1[i][2] || 0);
         var name = (data1[i][6] || "").toString().trim();
-        if (name) {
-          nameGroups[name] = (nameGroups[name] || 0) + groups;
-        }
+        if (name) nameGroups[name] = (nameGroups[name] || 0) + groups;
       }
     }
   }
 
-  // フォームの回答2: B=プランナー名[1], C=イベント名[2], D=組数[3], E=人数[4]
   var sheet2 = ss.getSheetByName("フォームの回答 2");
   if (sheet2) {
     var data2 = sheet2.getDataRange().getValues();
@@ -79,12 +138,10 @@ function doGet(e) {
       var cellValue2 = (data2[j][2] || "").toString().trim();
       if (isEventMatch(cellValue2, eventName)) {
         var groups2 = Number(data2[j][3] || 0);
-        totalGroups = totalGroups + groups2;
-        totalPeople = totalPeople + Number(data2[j][4] || 0);
+        totalGroups += groups2;
+        totalPeople += Number(data2[j][4] || 0);
         var name2 = (data2[j][1] || "").toString().trim();
-        if (name2) {
-          nameGroups[name2] = (nameGroups[name2] || 0) + groups2;
-        }
+        if (name2) nameGroups[name2] = (nameGroups[name2] || 0) + groups2;
       }
     }
   }
@@ -93,6 +150,5 @@ function doGet(e) {
   for (var n in nameGroups) {
     planners.push({name: n, groups: nameGroups[n]});
   }
-  var result = JSON.stringify({groups: totalGroups, people: totalPeople, planners: planners});
-  return ContentService.createTextOutput(result).setMimeType(ContentService.MimeType.JSON);
+  return ContentService.createTextOutput(JSON.stringify({groups: totalGroups, people: totalPeople, planners: planners})).setMimeType(ContentService.MimeType.JSON);
 }

@@ -1,0 +1,139 @@
+function doPost(e) {
+  var data = JSON.parse(e.postData.contents);
+  var ss = SpreadsheetApp.openById("1YSQGhZov0-efXPDdfAsqOTa73MWlc1cIINq7Xd47OsY");
+
+  // 管理者: 特定行を更新
+  if (data.action === "adminEditRow") {
+    var targetSheet = ss.getSheetByName(data.sheetName);
+    if (targetSheet) {
+      var row = data.row;
+      if (data.sheetName === "Web実績") {
+        // C=組数[3], D=人数[4], E=VC[5], F=アセット[6], G=PC[7], H=iPhone[8], I=その他[9], J=課題[10], K=対策[11], L=講師[12], M=プランナー数[13]
+        targetSheet.getRange(row, 3).setValue(Number(data.groupCount));
+        targetSheet.getRange(row, 4).setValue(Number(data.participantCount));
+        targetSheet.getRange(row, 5).setValue(Number(data.vcCount));
+        targetSheet.getRange(row, 6).setValue(Number(data.assetCount));
+        targetSheet.getRange(row, 7).setValue(Number(data.pcCount));
+        targetSheet.getRange(row, 8).setValue(Number(data.iphoneCount));
+        targetSheet.getRange(row, 9).setValue(Number(data.otherCount));
+        targetSheet.getRange(row, 10).setValue(data.issues || "");
+        targetSheet.getRange(row, 11).setValue(data.measures || "");
+        targetSheet.getRange(row, 12).setValue(data.instructor || "");
+        targetSheet.getRange(row, 13).setValue(Number(data.plannerCount));
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "updated"})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 管理者: 特定行を削除
+  if (data.action === "adminDeleteRow") {
+    var targetSheet2 = ss.getSheetByName(data.sheetName);
+    if (targetSheet2 && data.row > 1) {
+      targetSheet2.deleteRow(data.row);
+    }
+    return ContentService.createTextOutput(JSON.stringify({status: "deleted"})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 通常の実績報告追加
+  var sheet = ss.getSheetByName("Web実績");
+  sheet.appendRow([
+    new Date(), data.eventName, data.groupCount, data.participantCount,
+    data.vcCount, data.assetCount, data.pcCount, data.iphoneCount, data.otherCount,
+    data.issues, data.measures, data.instructor, data.plannerCount, data.plannerCost, data.otherCost
+  ]);
+  return ContentService.createTextOutput("ok");
+}
+
+function extractMonthDay(str) {
+  var m1 = str.match(/(\d{4})-(\d{2})-(\d{2})/);
+  if (m1) return parseInt(m1[2]) + "/" + parseInt(m1[3]);
+  var m2 = str.match(/(\d{1,2})\/(\d{1,2})/);
+  if (m2) return parseInt(m2[1]) + "/" + parseInt(m2[2]);
+  return null;
+}
+
+function isEventMatch(cellValue, eventName) {
+  if (!cellValue || !eventName) return false;
+  if (cellValue === eventName) return true;
+  var venues = ["富里", "成田", "鎌ヶ谷", "鎌ケ谷"];
+  var cellVenue = "";
+  var eventVenue = "";
+  for (var v = 0; v < venues.length; v++) {
+    if (cellValue.indexOf(venues[v]) >= 0) cellVenue = venues[v];
+    if (eventName.indexOf(venues[v]) >= 0) eventVenue = venues[v];
+  }
+  if (cellVenue === "鎌ケ谷") cellVenue = "鎌ヶ谷";
+  if (eventVenue === "鎌ケ谷") eventVenue = "鎌ヶ谷";
+  if (!cellVenue || !eventVenue || cellVenue !== eventVenue) return false;
+  var cellDate = extractMonthDay(cellValue);
+  var eventDate = extractMonthDay(eventName);
+  if (!cellDate || !eventDate || cellDate !== eventDate) return false;
+  return true;
+}
+
+function doGet(e) {
+  var ss = SpreadsheetApp.openById("1YSQGhZov0-efXPDdfAsqOTa73MWlc1cIINq7Xd47OsY");
+  var eventName = (e.parameter.event || "").toString().trim();
+
+  // 管理者: 個別レコード一覧を取得
+  if (e.parameter.adminList === "true") {
+    var records = [];
+    var sheets = ["Web実績", "フォームの回答 1"];
+    for (var s = 0; s < sheets.length; s++) {
+      var sheet = ss.getSheetByName(sheets[s]);
+      if (!sheet) continue;
+      var data = sheet.getDataRange().getValues();
+      for (var i = 1; i < data.length; i++) {
+        var cv = (data[i][1] || "").toString().trim();
+        if (isEventMatch(cv, eventName)) {
+          records.push({
+            sheet: sheets[s], row: i + 1,
+            date: data[i][0] ? new Date(data[i][0]).toLocaleString("ja-JP") : "",
+            groupCount: Number(data[i][2] || 0),
+            participantCount: Number(data[i][3] || 0),
+            vcCount: Number(data[i][4] || 0),
+            assetCount: Number(data[i][5] || 0),
+            pcCount: Number(data[i][6] || 0),
+            iphoneCount: Number(data[i][7] || 0),
+            otherCount: Number(data[i][8] || 0),
+            issues: (data[i][9] || "").toString(),
+            measures: (data[i][10] || "").toString(),
+            instructor: (data[i][11] || "").toString(),
+            plannerCount: Number(data[i][12] || 0),
+            note: sheets[s] === "フォームの回答 1" ? "Googleフォーム" : "Web入力"
+          });
+        }
+      }
+    }
+    return ContentService.createTextOutput(JSON.stringify({records: records})).setMimeType(ContentService.MimeType.JSON);
+  }
+
+  // 通常: 合計を返す
+  var result = {found: false};
+  var sheets = ["Web実績", "フォームの回答 1"];
+  for (var s = 0; s < sheets.length; s++) {
+    var sheet = ss.getSheetByName(sheets[s]);
+    if (!sheet) continue;
+    var data = sheet.getDataRange().getValues();
+    for (var i = 1; i < data.length; i++) {
+      var cellValue = (data[i][1] || "").toString().trim();
+      if (isEventMatch(cellValue, eventName)) {
+        result.found = true;
+        result.groupCount = (result.groupCount || 0) + Number(data[i][2] || 0);
+        result.participantCount = (result.participantCount || 0) + Number(data[i][3] || 0);
+        result.vcCount = (result.vcCount || 0) + Number(data[i][4] || 0);
+        result.assetCount = (result.assetCount || 0) + Number(data[i][5] || 0);
+        result.pcCount = (result.pcCount || 0) + Number(data[i][6] || 0);
+        result.iphoneCount = (result.iphoneCount || 0) + Number(data[i][7] || 0);
+        result.otherCount = (result.otherCount || 0) + Number(data[i][8] || 0);
+        result.issues = (data[i][9] || "").toString();
+        result.measures = (data[i][10] || "").toString();
+        result.instructor = (data[i][11] || "").toString();
+        result.plannerCount = (result.plannerCount || 0) + Number(data[i][12] || 0);
+        result.plannerCost = (result.plannerCost || 0) + Number(data[i][13] || 0);
+        result.otherCost = (result.otherCost || 0) + Number(data[i][14] || 0);
+      }
+    }
+  }
+  return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+}
