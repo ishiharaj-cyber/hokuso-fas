@@ -70,7 +70,7 @@ function readTotals() {
     if (item) itemRows[item] = r;
   }
 
-  var totalCust = 0, totalVC = 0, totalAO = 0;
+  var totalCust = 0, totalDX = 0, totalAO = 0;
   var planners = {};
 
   for (var c = 3; c < nameRow.length; c++) {
@@ -91,12 +91,12 @@ function readTotals() {
     }
 
     totalCust += cust;
-    totalVC += dx;
+    totalDX += dx;
     totalAO += ao;
     planners[nameKey] = { cust: cust, people: people, ao: ao, dx: dx, asset: asset };
   }
 
-  return { totalCust: totalCust, totalVC: totalVC, totalAO: totalAO, planners: planners };
+  return { totalCust: totalCust, totalDX: totalDX, totalAO: totalAO, planners: planners };
 }
 
 function saveData(e) {

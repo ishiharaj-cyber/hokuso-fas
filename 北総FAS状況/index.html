@@ -70,7 +70,7 @@ body {
 .ic-people { background: linear-gradient(135deg, #4a7cc9, #6b9ee0); }
 .ic-bases { background: linear-gradient(135deg, #6b5ea6, #9b8ec4); }
 .ic-cust { background: linear-gradient(135deg, #4a9c7c, #6bc0a0); }
-.ic-vc { background: linear-gradient(135deg, #c97a4a, #e0a56b); }
+.ic-dx { background: linear-gradient(135deg, #c97a4a, #e0a56b); }
 
 /* 検索 */
 .search-area { margin-bottom: 24px; text-align: center; }
@@ -257,8 +257,8 @@ body {
             <div class="lbl">総AO生数</div>
         </div>
         <div class="icon-stat">
-            <div class="ic ic-vc"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
-            <div class="num" id="sVC">-</div>
+            <div class="ic ic-dx"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg></div>
+            <div class="num" id="sDX">-</div>
             <div class="lbl">総DX数</div>
         </div>
         <div class="icon-stat" id="assetRanking" style="display:none; padding:12px 14px;">
@@ -480,7 +480,7 @@ function onTotalsLoaded(data) {
 
     document.getElementById('sCust').textContent = totalCust;
     document.getElementById('sAO').textContent = totalAO;
-    document.getElementById('sVC').textContent = totalDX;
+    document.getElementById('sDX').textContent = totalDX;
 
     // 累計アセットTOP10
     var rankArr = [];
