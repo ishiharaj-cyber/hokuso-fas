@@ -72,7 +72,7 @@ body {
 .tab-bar {
     display: flex; gap: 4px; margin-bottom: 16px;
     background: rgba(255,255,255,0.6); padding: 4px;
-    border-radius: 14px; overflow-x: auto;
+    border-radius: 14px; flex-wrap: wrap;
 }
 .tab-btn {
     padding: 10px 18px; border: none; border-radius: 12px;
@@ -249,8 +249,8 @@ body {
     .profile-header { flex-direction: column; text-align: center; padding: 20px 16px; }
     .profile-info h1 { font-size: 20px; }
     .profile-avatar { width: 64px; height: 64px; font-size: 24px; }
-    .tab-bar { gap: 2px; padding: 3px; border-radius: 12px; -webkit-overflow-scrolling: touch; }
-    .tab-btn { padding: 8px 10px; font-size: 11px; border-radius: 10px; }
+    .tab-bar { gap: 2px; padding: 3px; border-radius: 12px; flex-wrap: wrap; }
+    .tab-btn { padding: 7px 8px; font-size: 11px; border-radius: 10px; flex: 1 1 auto; }
     .data-grid { grid-template-columns: 1fr; gap: 6px; }
     .data-item { padding: 10px 14px; }
     .data-item .label { font-size: 13px; }
@@ -330,7 +330,7 @@ body {
                 <h3>計画生産シート</h3>
                 <div class="plan-upload-box">
                     <div class="plan-row">
-                        <input type="text" id="planTitle" class="plan-title-input" placeholder="タイトルを入力（例：2026年5月 提案資料）">
+                        <input type="text" id="planTitle" class="plan-title-input" placeholder="タイトルを入力（例：不動産業（しごと）の方への提案 / 趣味が◯◯の方への提案）">
                     </div>
                     <div class="plan-row">
                         <label class="plan-file-label" for="planFile">📎 ファイルを選ぶ</label>
@@ -338,7 +338,7 @@ body {
                         <span class="plan-file-name" id="planFileName">未選択</span>
                         <button class="btn btn-primary" id="planUploadBtn" onclick="uploadPlan()">アップロード</button>
                     </div>
-                    <div class="plan-upload-hint">PDF・画像（最大10MB） / タイトルはファイルを区別する見出しとして表示されます</div>
+                    <div class="plan-upload-hint">PDF・画像（最大10MB） / 日付は自動記録されるので、タイトルは計画の内容（対象者・テーマ等）を入れてください</div>
                 </div>
                 <div class="plan-progress" id="planProgress"></div>
                 <div id="planList"><div class="plan-empty">読み込み中...</div></div>
