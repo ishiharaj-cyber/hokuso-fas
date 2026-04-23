@@ -172,6 +172,78 @@ body {
 .history-row .h-new { color: #4a7cc9; font-weight: 700; min-width: 50px; text-align: right; }
 .history-empty { text-align: center; padding: 30px; color: #a0a8c0; font-size: 14px; }
 
+/* 計画生産シート */
+.plan-upload-box {
+    background: rgba(240, 244, 255, 0.6);
+    border: 2px dashed rgba(74, 124, 201, 0.35);
+    border-radius: 14px; padding: 18px; margin-bottom: 16px;
+}
+.plan-upload-box .plan-row { display: flex; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+.plan-title-input {
+    flex: 1; min-width: 200px;
+    padding: 10px 14px; border: 2px solid rgba(74, 124, 201, 0.25);
+    border-radius: 10px; font-size: 14px; color: #3a4060;
+    font-family: "Zen Maru Gothic", sans-serif; background: white; outline: none;
+    transition: border-color 0.2s;
+}
+.plan-title-input:focus { border-color: #4a7cc9; }
+.plan-file-input { display: none; }
+.plan-file-label {
+    display: inline-flex; align-items: center; gap: 6px;
+    padding: 10px 16px; background: white;
+    border: 2px solid rgba(74, 124, 201, 0.25); border-radius: 10px;
+    font-size: 13px; color: #4a7cc9; cursor: pointer; font-weight: 500;
+    transition: all 0.2s;
+}
+.plan-file-label:hover { background: rgba(74, 124, 201, 0.08); border-color: #4a7cc9; }
+.plan-file-name { font-size: 12px; color: #6a7090; margin-left: 4px; align-self: center; }
+.plan-upload-hint { font-size: 11px; color: #8a90a8; margin-top: 4px; }
+
+.plan-card {
+    background: white; border-radius: 16px; padding: 18px;
+    margin-bottom: 12px; border: 1px solid rgba(180, 190, 220, 0.25);
+    box-shadow: 0 2px 10px rgba(100, 120, 180, 0.06);
+}
+.plan-card-title {
+    font-size: 18px; font-weight: 700; color: #3a4060;
+    margin-bottom: 6px; line-height: 1.4;
+    padding-bottom: 8px; border-bottom: 2px solid rgba(74, 124, 201, 0.15);
+}
+.plan-card-meta {
+    font-size: 12px; color: #8a90a8; margin-bottom: 12px;
+    display: flex; justify-content: space-between; align-items: center;
+}
+.plan-card-body { text-align: center; }
+.plan-card-img {
+    max-width: 100%; max-height: 400px; border-radius: 10px;
+    border: 1px solid rgba(180, 190, 220, 0.3); cursor: pointer;
+    transition: transform 0.2s;
+}
+.plan-card-img:hover { transform: scale(1.02); }
+.plan-card-pdf {
+    display: inline-flex; align-items: center; gap: 10px;
+    padding: 14px 22px; background: rgba(201, 90, 74, 0.08);
+    border: 1px solid rgba(201, 90, 74, 0.2); border-radius: 12px;
+    color: #b04a3a; text-decoration: none; font-weight: 600; font-size: 14px;
+    transition: all 0.2s;
+}
+.plan-card-pdf:hover { background: rgba(201, 90, 74, 0.15); }
+.plan-card-pdf .pdf-icon { font-size: 22px; }
+.plan-card-delete {
+    margin-top: 10px; padding: 6px 14px; font-size: 12px;
+    background: rgba(201, 74, 90, 0.08); color: #c94a5a;
+    border: none; border-radius: 8px; cursor: pointer;
+    font-family: "Zen Maru Gothic", sans-serif; transition: background 0.2s;
+}
+.plan-card-delete:hover { background: rgba(201, 74, 90, 0.2); }
+.plan-empty { text-align: center; padding: 40px 20px; color: #a0a8c0; font-size: 14px; }
+.plan-progress {
+    padding: 14px; background: rgba(74, 124, 201, 0.08);
+    border-radius: 10px; color: #4a7cc9; font-size: 13px;
+    text-align: center; margin-bottom: 14px; display: none;
+}
+.plan-progress.show { display: block; }
+
 @media (max-width: 768px) {
     .container { padding: 12px; }
     .profile-header { flex-direction: column; text-align: center; padding: 20px 16px; }
@@ -231,6 +303,7 @@ body {
             <button class="tab-btn" data-tab="event">イベント</button>
             <button class="tab-btn" data-tab="appoint">アポイント（当月）</button>
             <button class="tab-btn" data-tab="recruit">人材獲得</button>
+            <button class="tab-btn" data-tab="plan">計画生産シート</button>
             <button class="tab-btn" data-tab="history">履歴（単日）</button>
         </div>
 
@@ -251,6 +324,25 @@ body {
         </div>
         <div class="section" id="sec-recruit">
             <div class="data-card"><h3>人材獲得</h3><div class="data-grid" id="grid-recruit"></div></div>
+        </div>
+        <div class="section" id="sec-plan">
+            <div class="data-card">
+                <h3>計画生産シート</h3>
+                <div class="plan-upload-box">
+                    <div class="plan-row">
+                        <input type="text" id="planTitle" class="plan-title-input" placeholder="タイトルを入力（例：2026年5月 提案資料）">
+                    </div>
+                    <div class="plan-row">
+                        <label class="plan-file-label" for="planFile">📎 ファイルを選ぶ</label>
+                        <input type="file" id="planFile" class="plan-file-input" accept="image/*,application/pdf" onchange="onPlanFilePick()">
+                        <span class="plan-file-name" id="planFileName">未選択</span>
+                        <button class="btn btn-primary" id="planUploadBtn" onclick="uploadPlan()">アップロード</button>
+                    </div>
+                    <div class="plan-upload-hint">PDF・画像（最大10MB） / タイトルはファイルを区別する見出しとして表示されます</div>
+                </div>
+                <div class="plan-progress" id="planProgress"></div>
+                <div id="planList"><div class="plan-empty">読み込み中...</div></div>
+            </div>
         </div>
         <div class="section" id="sec-history">
             <div class="data-card" id="assetSummaryCard" style="display:none; text-align:center; margin-bottom:14px;">
@@ -349,8 +441,135 @@ async function init() {
             btn.classList.add("active");
             document.getElementById("sec-" + btn.dataset.tab).classList.add("active");
             if (btn.dataset.tab === "history") { loadHistory(); showAssetTotal(); }
+            if (btn.dataset.tab === "plan") { loadPlanList(); }
         });
     });
+}
+
+// 計画生産シート
+function onPlanFilePick() {
+    var f = document.getElementById("planFile").files[0];
+    document.getElementById("planFileName").textContent = f ? f.name + " (" + Math.round(f.size/1024) + "KB)" : "未選択";
+}
+
+function uploadPlan() {
+    var title = document.getElementById("planTitle").value.trim();
+    var fileInput = document.getElementById("planFile");
+    var file = fileInput.files[0];
+    if (!title) { alert("タイトルを入力してください"); return; }
+    if (!file) { alert("ファイルを選択してください"); return; }
+    if (file.size > 10 * 1024 * 1024) { alert("10MB以下のファイルにしてください"); return; }
+
+    var btn = document.getElementById("planUploadBtn");
+    var progress = document.getElementById("planProgress");
+    btn.disabled = true;
+    btn.textContent = "送信中...";
+    progress.className = "plan-progress show";
+    progress.textContent = "アップロード中... ファイルサイズによっては10〜30秒かかります";
+
+    var reader = new FileReader();
+    reader.onload = function(ev) {
+        var base64 = ev.target.result.split(",")[1];
+        fetch(GAS_URL, {
+            method: "POST",
+            headers: { "Content-Type": "text/plain;charset=utf-8" },
+            body: JSON.stringify({
+                action: "plan_upload",
+                name: profile.name,
+                title: title,
+                filename: file.name,
+                contentType: file.type,
+                data: base64
+            })
+        }).then(function(r) { return r.json(); }).then(function(result) {
+            if (result.status === "ok") {
+                document.getElementById("planTitle").value = "";
+                fileInput.value = "";
+                document.getElementById("planFileName").textContent = "未選択";
+                progress.textContent = "アップロード完了";
+                setTimeout(function() { progress.className = "plan-progress"; }, 2000);
+                loadPlanList();
+            } else {
+                progress.textContent = "エラー: " + (result.message || "不明");
+            }
+            btn.disabled = false;
+            btn.textContent = "アップロード";
+        }).catch(function(e) {
+            progress.textContent = "通信エラー: " + e;
+            btn.disabled = false;
+            btn.textContent = "アップロード";
+        });
+    };
+    reader.onerror = function() {
+        progress.textContent = "ファイル読み込みエラー";
+        btn.disabled = false;
+        btn.textContent = "アップロード";
+    };
+    reader.readAsDataURL(file);
+}
+
+function loadPlanList() {
+    var area = document.getElementById("planList");
+    area.innerHTML = '<div class="plan-empty">読み込み中...</div>';
+    var cbName = "onPlanListLoaded_" + Date.now();
+    window[cbName] = function(data) {
+        delete window[cbName];
+        renderPlanList(data);
+    };
+    var script = document.createElement("script");
+    script.src = GAS_URL + "?action=plan_list&name=" + encodeURIComponent(profile.name) + "&callback=" + cbName + "&_=" + Date.now();
+    document.body.appendChild(script);
+}
+
+function renderPlanList(data) {
+    var area = document.getElementById("planList");
+    if (!data || data.status !== "ok" || !data.items || data.items.length === 0) {
+        area.innerHTML = '<div class="plan-empty">まだ計画生産シートはアップロードされていません</div>';
+        return;
+    }
+    var html = "";
+    for (var i = 0; i < data.items.length; i++) {
+        var it = data.items[i];
+        var isImage = /^image\//.test(it.contentType);
+        var viewUrl = "https://drive.google.com/file/d/" + encodeURIComponent(it.fileId) + "/view";
+        var thumbUrl = "https://drive.google.com/thumbnail?id=" + encodeURIComponent(it.fileId) + "&sz=w1200";
+        html += '<div class="plan-card">';
+        html += '<div class="plan-card-title">' + esc(it.title) + '</div>';
+        html += '<div class="plan-card-meta"><span>' + esc(it.date) + '</span><span>' + esc(it.filename) + '</span></div>';
+        html += '<div class="plan-card-body">';
+        if (isImage) {
+            html += '<a href="' + viewUrl + '" target="_blank" rel="noopener">'
+                + '<img class="plan-card-img" src="' + thumbUrl + '" alt="' + esc(it.title) + '" loading="lazy">'
+                + '</a>';
+        } else {
+            html += '<a class="plan-card-pdf" href="' + viewUrl + '" target="_blank" rel="noopener">'
+                + '<span class="pdf-icon">📄</span><span>PDFを開く</span>'
+                + '</a>';
+        }
+        html += '</div>';
+        html += '<div style="text-align:right;">'
+            + '<button class="plan-card-delete" onclick="deletePlan(\'' + esc(it.fileId) + '\', \'' + esc(it.title).replace(/'/g, "&#39;") + '\')">削除</button>'
+            + '</div>';
+        html += '</div>';
+    }
+    area.innerHTML = html;
+}
+
+function deletePlan(fileId, title) {
+    if (!confirm("「" + title + "」を削除しますか？この操作は取り消せません。")) return;
+    var cbName = "onPlanDeleted_" + Date.now();
+    window[cbName] = function(data) {
+        delete window[cbName];
+        if (data && data.status === "ok") {
+            loadPlanList();
+        } else {
+            alert("削除エラー: " + (data && data.message ? data.message : "不明"));
+        }
+    };
+    var script = document.createElement("script");
+    script.src = GAS_URL + "?action=plan_delete&name=" + encodeURIComponent(profile.name)
+        + "&fileId=" + encodeURIComponent(fileId) + "&callback=" + cbName + "&_=" + Date.now();
+    document.body.appendChild(script);
 }
 
 function renderCategory(gridId, items) {

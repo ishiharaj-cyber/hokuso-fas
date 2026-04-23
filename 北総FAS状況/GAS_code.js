@@ -3,6 +3,10 @@ var SHEET_NAME = "SL富里のコピー";
 
 var LOG_PASSWORD = "hokuso2026";
 
+var PLAN_FOLDER_NAME = "FAS計画生産シート";
+var PLAN_SHEET_NAME = "計画シート管理";
+var PLAN_DELETE_LOG = "計画シート削除ログ";
+
 function doGet(e) {
   var callback = e.parameter.callback || "";
   var action = e.parameter.action || "";
@@ -16,6 +20,10 @@ function doGet(e) {
     json = JSON.stringify(readLog(e));
   } else if (action === "mylog") {
     json = JSON.stringify(readMyLog(e));
+  } else if (action === "plan_list") {
+    json = JSON.stringify(planList(e.parameter.name || ""));
+  } else if (action === "plan_delete") {
+    json = JSON.stringify(planDelete(e.parameter.name || "", e.parameter.fileId || ""));
   } else {
     json = JSON.stringify(readData(e));
   }
@@ -28,6 +36,10 @@ function doGet(e) {
 
 function doPost(e) {
   var data = JSON.parse(e.postData.contents);
+  if (data.action === "plan_upload") {
+    var result = planUpload(data.name, data.title, data.filename, data.contentType, data.data);
+    return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
+  }
   var result = saveDataDirect(data.name, data.values);
   return ContentService.createTextOutput(JSON.stringify(result)).setMimeType(ContentService.MimeType.JSON);
 }
@@ -245,6 +257,120 @@ function readLog(e) {
     });
   }
   return { status: "ok", logs: logs };
+}
+
+function getOrCreatePlanFolder() {
+  var folders = DriveApp.getFoldersByName(PLAN_FOLDER_NAME);
+  if (folders.hasNext()) return folders.next();
+  return DriveApp.createFolder(PLAN_FOLDER_NAME);
+}
+
+function getOrCreatePlanSheet() {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(PLAN_SHEET_NAME);
+  if (!sh) {
+    sh = ss.insertSheet(PLAN_SHEET_NAME);
+    sh.appendRow(["日時", "プランナー名", "タイトル", "ファイル名", "ファイルID", "MIMEタイプ", "状態"]);
+    sh.getRange(1, 1, 1, 7).setFontWeight("bold");
+  }
+  return sh;
+}
+
+function planUpload(name, title, filename, contentType, base64Data) {
+  if (!name || !title || !filename || !base64Data) {
+    return { status: "error", message: "必要な項目が不足しています" };
+  }
+  try {
+    var folder = getOrCreatePlanFolder();
+    var blob = Utilities.newBlob(Utilities.base64Decode(base64Data), contentType || "application/octet-stream", filename);
+    var file = folder.createFile(blob);
+    file.setSharing(DriveApp.Access.ANYONE_WITH_LINK, DriveApp.Permission.VIEW);
+    var sh = getOrCreatePlanSheet();
+    var now = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss");
+    sh.appendRow([now, name, title, filename, file.getId(), contentType || "", "active"]);
+    return {
+      status: "ok",
+      fileId: file.getId(),
+      date: now,
+      title: title,
+      filename: filename,
+      contentType: contentType || ""
+    };
+  } catch (err) {
+    return { status: "error", message: String(err) };
+  }
+}
+
+function planList(name) {
+  try {
+    var sh = getOrCreatePlanSheet();
+    var data = sh.getDataRange().getValues();
+    var displayData = sh.getDataRange().getDisplayValues();
+    var list = [];
+    var nameKey = (name || "").replace(/\s/g, "");
+    for (var r = 1; r < data.length; r++) {
+      var rowName = data[r][1] ? data[r][1].toString().replace(/\s/g, "") : "";
+      if (nameKey && rowName !== nameKey) continue;
+      var status = data[r][6] || "active";
+      if (status === "deleted") continue;
+      list.push({
+        date: displayData[r][0] || "",
+        name: data[r][1] ? data[r][1].toString() : "",
+        title: data[r][2] ? data[r][2].toString() : "",
+        filename: data[r][3] ? data[r][3].toString() : "",
+        fileId: data[r][4] ? data[r][4].toString() : "",
+        contentType: data[r][5] ? data[r][5].toString() : ""
+      });
+    }
+    // 新しい順
+    list.reverse();
+    return { status: "ok", items: list };
+  } catch (err) {
+    return { status: "error", message: String(err), items: [] };
+  }
+}
+
+function planDelete(name, fileId) {
+  if (!name || !fileId) {
+    return { status: "error", message: "name と fileId が必要です" };
+  }
+  try {
+    var sh = getOrCreatePlanSheet();
+    var data = sh.getDataRange().getValues();
+    var nameKey = name.replace(/\s/g, "");
+    for (var r = 1; r < data.length; r++) {
+      if (data[r][4] && data[r][4].toString() === fileId) {
+        var rowName = data[r][1] ? data[r][1].toString().replace(/\s/g, "") : "";
+        if (rowName !== nameKey) {
+          return { status: "error", message: "本人のみ削除できます" };
+        }
+        sh.getRange(r + 1, 7).setValue("deleted");
+        var title = data[r][2] ? data[r][2].toString() : "";
+        var filename = data[r][3] ? data[r][3].toString() : "";
+        try {
+          var file = DriveApp.getFileById(fileId);
+          file.setTrashed(true);
+        } catch (e) {}
+        writePlanDeleteLog(name, title, filename, fileId);
+        return { status: "ok" };
+      }
+    }
+    return { status: "error", message: "該当ファイルが見つかりません" };
+  } catch (err) {
+    return { status: "error", message: String(err) };
+  }
+}
+
+function writePlanDeleteLog(name, title, filename, fileId) {
+  var ss = SpreadsheetApp.openById(SHEET_ID);
+  var sh = ss.getSheetByName(PLAN_DELETE_LOG);
+  if (!sh) {
+    sh = ss.insertSheet(PLAN_DELETE_LOG);
+    sh.appendRow(["日時", "プランナー名", "タイトル", "ファイル名", "ファイルID"]);
+    sh.getRange(1, 1, 1, 5).setFontWeight("bold");
+  }
+  var now = Utilities.formatDate(new Date(), "Asia/Tokyo", "yyyy/MM/dd HH:mm:ss");
+  sh.appendRow([now, name, title, filename, fileId]);
 }
 
 function writeLog(ss, name, values, updatedKeys, oldValues) {
